@@ -306,6 +306,9 @@ This package provides the perf tool and the supporting documentation.
 # Disable the building of the debug package(s).
 %define debug_package %{nil}
 
+# Disable erroring out if unpackaged files are found.
+%define _unpackaged_files_terminate_build 0
+
 %prep
 %setup -q -n %{name}-%{version} -c
 %{__mv} linux-%{LKAver} linux-%{version}-%{release}.%{_target_cpu}
