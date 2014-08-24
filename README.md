@@ -1,44 +1,32 @@
-As of 2013/11/26
-
-* Docker 0.7 has been [released](http://blog.docker.io/2013/11/docker-0-7-docker-now-runs-on-any-linux-distribution/#more-1596) and supports devicemapper thin provisioning as an alternative to aufs
-* Docker has been packaged in [Fedora and EPEL](https://admin.fedoraproject.org/pkgdb/acls/name/docker-io)
-
-Thus the work in this repository is no longer necessary.
-
-This repository contains the files needed to build RPMs for the dependencies of [Docker](http://docker.io) released before 0.7 on Red Hat Enterprise Linux 6 and derivatives like CentOS and Scientific Linux. The kernel spec file is based on the [kernel-ml](http://elrepo.org/tiki/kernel-ml) package from ELRepo but adds [aufs](http://aufs.sourceforge.net/) support. The lxc spec file is copied from [Fedora](https://admin.fedoraproject.org/pkgdb/acls/name/lxc).
+This repository contains the specfile and config files to build [kernel-ml](http://elrepo.org/tiki/kernel-ml) kernels that include AUFS for use with Docker. The Docker spec files are part of the original repo this was forked from, and should be considered outdated. Use Docker from [EPEL](https://admin.fedoraproject.org/pkgdb/acls/name/docker-io) instead.
 
 Before building the packages, be sure to install [fedora-packager](https://dl.fedoraproject.org/pub/epel/6/x86_64/repoview/fedora-packager.html) and add yourself to the _mock_ group.
 
-You can build the packages with the following commands. Note that building the kernel can take a long time, maybe even hours. If you want to build these for Fedora instead of RHEL, when running mock you should replace epel-6-x86\_64 with fedora-19-x86\_64. Also, you can skip building the lxc rpm because it already exists in Fedora's repository.
+You can build the packages with the following commands. Note that building the kernel can take a long time, possibly even several hours. If you want to build these for Fedora instead of RHEL, when running mock you should replace epel-6-x86\_64 with fedora-19-x86\_64. Also, you can skip building the lxc rpm because it already exists in Fedora's repository.
 
-    # build docker rpm
-    spectool -g -C lxc-docker lxc-docker/lxc-docker.spec
-    mock -r epel-6-x86_64 --buildsrpm --spec lxc-docker/lxc-docker.spec --sources lxc-docker --resultdir output
-    mock -r epel-6-x86_64 --rebuild --resultdir output output/lxc-docker-0.6.7-1.el6.src.rpm
-
-    # build lxc rpm
-    spectool -g -C lxc lxc/lxc.spec
-    mock -r epel-6-x86_64 --buildsrpm --spec lxc/lxc.spec --sources lxc --resultdir output
-    mock -r epel-6-x86_64 --rebuild --resultdir output output/lxc-0.8.0-3.el6.src.rpm
+*NOTE*: ```9929e444955f467073ebedf254a9ac0f7a5df1c5``` refers to the latest commit of the ```aufs3.16``` branch at the time of this writing. When you build your kernel versions, feel free to update this step to the latest commit.
 
     # build kernel rpm
-    spectool -g -C kernel-ml-aufs kernel-ml-aufs/kernel-ml-aufs-3.10.spec
-    git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs3.10
+    
+    spectool -g -C kernel-ml-aufs kernel-ml-aufs/kernel-ml-aufs-3.16.spec 
+    git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs3.16
     pushd aufs3-standalone
-    git archive 9929e444955f467073ebedf254a9ac0f7a5df1c5 > ../kernel-ml-aufs/aufs3-standalone.tar
+    git archive 53c6c3305f8a17b5911f960a8788edf98392e0ed > ../kernel-ml-aufs/aufs3-standalone.tar
     popd
-    mock -r epel-6-x86_64 --buildsrpm --spec kernel-ml-aufs/kernel-ml-aufs-3.10.spec --sources kernel-ml-aufs --resultdir output
-    mock -r epel-6-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-3.10.11-1.el6.src.rpm
+    mock -r epel-6-x86_64 --buildsrpm --spec kernel-ml-aufs/kernel-ml-aufs-3.16.spec --sources kernel-ml-aufs --resultdir output
+    mock -r epel-6-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-3.16.1-1.el6.src.rpm
 
 The resulting RPMs will be placed in a directory named _output_. You can install them with
 
     cd output
-    yum localinstall --nogpgcheck kernel-ml-aufs-3.10.11-1.el6.x86_64.rpm lxc-0.8.0-3.el6.x86_64.rpm lxc-libs-0.8.0-3.el6.x86_64.rpm lxc-docker-0.6.7-1.el6.x86_64.rpm
+    yum localinstall --nogpgcheck kernel-ml-aufs-3.10.11-1.el6.x86_64.rpm
+In order to use docker, you'll need to install it out of EPEL:
 
-In order to use docker, you'll need to configure the cgroup filesystem and reboot into your new kernel. Add the line
+    yum install docker
+You'll need to configure the cgroup filesystem and reboot into your new kernel. Add the line
 
     none                    /sys/fs/cgroup          cgroup  defaults        0 0
 
-to _/etc/fstab_. Reboot and choose the 3.10 kernel from your GRUB menu (or edit _/boot/grub/grub.conf_ and change your default kernel).
+to _/etc/fstab_. Reboot and choose the 3.xx kernel from your GRUB menu (or edit _/boot/grub/grub.conf_ and change your default kernel).
 
 The docker daemon should have started automatically; this can be controlled by via [initctl](http://upstart.ubuntu.com/cookbook/#initctl). To give a non-root user permission to use docker, add them to the _docker_ group.
