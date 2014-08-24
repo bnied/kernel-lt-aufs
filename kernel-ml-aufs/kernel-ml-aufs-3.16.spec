@@ -315,7 +315,6 @@ pushd linux-%{version}-%{release}.%{_target_cpu} > /dev/null
 cp -r ../%{AUFSver}/Documentation/filesystems Documentation/
 cp -r ../%{AUFSver}/Documentation/ABI Documentation/
 cp -r ../%{AUFSver}/fs/aufs fs/
-cp ../%{AUFSver}/include/linux/aufs_type.h include/linux/
 cp ../%{AUFSver}/include/uapi/linux/aufs_type.h include/uapi/linux/
 patch -p 1 < ../%{AUFSver}/aufs3-kbuild.patch
 patch -p 1 < ../%{AUFSver}/aufs3-base.patch
