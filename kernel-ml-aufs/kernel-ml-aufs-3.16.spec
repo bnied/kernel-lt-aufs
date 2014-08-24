@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 3.10.11
+%define LKAver 3.16.1
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs3-standalone
@@ -796,6 +796,9 @@ fi
 %endif
 
 %changelog
+* Sat Aug 23 2014 Ben Nied <spacewreckage@gmail.com> - 3.16.1
+- Updated kernel to 3.16.1
+
 * Sun Sep 08 2013 Brian Pitts <brian@polibyte.com> - 3.10.11-1
 - Updated with the 3.10.11 source tarball.
 
