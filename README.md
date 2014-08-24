@@ -1,10 +1,13 @@
+NOTE: This is a work-in-progress to get AUFS building against kernel-ml 3.16.1. Breakage should be expected.
+=============================================================================
+
 This repository contains the specfile and config files to build [kernel-ml](http://elrepo.org/tiki/kernel-ml) kernels that include AUFS for use with Docker. The Docker spec files are part of the original repo this was forked from, and should be considered outdated. Use Docker from [EPEL](https://admin.fedoraproject.org/pkgdb/acls/name/docker-io) instead.
 
 Before building the packages, be sure to install [fedora-packager](https://dl.fedoraproject.org/pub/epel/6/x86_64/repoview/fedora-packager.html) and add yourself to the _mock_ group.
 
 You can build the packages with the following commands. Note that building the kernel can take a long time, possibly even several hours. If you want to build these for Fedora instead of RHEL, when running mock you should replace epel-6-x86\_64 with fedora-19-x86\_64. Also, you can skip building the lxc rpm because it already exists in Fedora's repository.
 
-*NOTE*: ```9929e444955f467073ebedf254a9ac0f7a5df1c5``` refers to the latest commit of the ```aufs3.16``` branch at the time of this writing. When you build your kernel versions, feel free to update this step to the latest commit.
+*NOTE*: `9929e444955f467073ebedf254a9ac0f7a5df1c5` refers to the latest commit of the `aufs3.16` branch at the time of this writing. When you build your kernel versions, feel free to update this step to the latest commit.
 
     # build kernel rpm
     
