@@ -1,4 +1,4 @@
-NOTE: This is a work-in-progress to get AUFS building against kernel-ml 3.16.1. Breakage should be expected.
+RHEL-AUFS-Kernel: `kernel-ml` with AUFS Support
 =============================================================================
 
 This repository contains the specfile and config files to build [kernel-ml](http://elrepo.org/tiki/kernel-ml) kernels that include AUFS for use with Docker. The Docker spec files are part of the original repo this was forked from, and should be considered outdated. Use Docker from [EPEL](https://admin.fedoraproject.org/pkgdb/acls/name/docker-io) instead.
