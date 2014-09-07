@@ -17,12 +17,12 @@ You can build the packages with the following commands. Note that building the k
     git archive 53c6c3305f8a17b5911f960a8788edf98392e0ed > ../kernel-ml-aufs/aufs3-standalone.tar
     popd
     mock -r epel-6-x86_64 --buildsrpm --spec kernel-ml-aufs/kernel-ml-aufs-3.16.spec --sources kernel-ml-aufs --resultdir output
-    mock -r epel-6-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-3.16.1-1.el6.src.rpm
+    mock -r epel-6-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-3.16.2-1.el6.src.rpm
 
 The resulting RPMs will be placed in a directory named _output_. You can install them with
 
     cd output
-    yum localinstall --nogpgcheck kernel-ml-aufs-3.16.1-1.el6.x86_64.rpm
+    yum localinstall --nogpgcheck kernel-ml-aufs-3.16.2-1.el6.x86_64.rpm
 In order to use docker, you'll need to install it out of EPEL:
 
     yum install docker-io
