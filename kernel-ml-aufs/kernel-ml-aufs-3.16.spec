@@ -61,6 +61,7 @@
 %define with_nonpae 0
 %define with_doc 0
 %define with_firmware 0
+%define with_perf 0
 %endif
 
 # Define the asmarch.
