@@ -7,14 +7,14 @@ Before building the packages, be sure to install [fedora-packager](https://dl.fe
 
 You can build the packages with the following commands. Note that building the kernel can take a long time, possibly even several hours. If you want to build these for Fedora instead of RHEL, when running mock you should replace epel-6-x86\_64 with fedora-19-x86\_64. 
 
-**NOTE**: `53c6c3305f8a17b5911f960a8788edf98392e0ed` was the latest commit of the `aufs3.16` branch at the time of this writing. When you build your kernel versions, feel free to update this step to the latest commit.
+**NOTE**: `dc68d7a9635435839e65d5828b036b33924e0a77` was the latest commit of the `aufs3.16` branch at the time of this writing. When you build your kernel versions, feel free to update this step to the latest commit.
 
     # build kernel rpm
 
     spectool -g -C kernel-ml-aufs kernel-ml-aufs/kernel-ml-aufs-3.16.spec
     git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs3.16
     pushd aufs3-standalone
-    git archive 53c6c3305f8a17b5911f960a8788edf98392e0ed > ../kernel-ml-aufs/aufs3-standalone.tar
+    git archive dc68d7a9635435839e65d5828b036b33924e0a77 > ../kernel-ml-aufs/aufs3-standalone.tar
     popd
     mock -r epel-6-x86_64 --buildsrpm --spec kernel-ml-aufs/kernel-ml-aufs-3.16.spec --sources kernel-ml-aufs --resultdir output
     mock -r epel-6-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-3.16.2-1.el6.src.rpm
