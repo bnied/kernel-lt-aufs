@@ -889,10 +889,10 @@ fi
 - CONFIG_SGI_XP=m, CONFIG_SGI_GRU=m, CONFIG_SGI_GRU_DEBUG disabled
 - and CONFIG_UV_MMTIMER=m [http://elrepo.org/bugs/view.php?id=368]
 
-* Tue Mar 04 2013 Alan Bartlett <ajb@elrepo.org> - 3.8.2-1
+* Mon Mar 04 2013 Alan Bartlett <ajb@elrepo.org> - 3.8.2-1
 - Updated with the 3.8.2 source tarball.
 
-* Tue Feb 28 2013 Alan Bartlett <ajb@elrepo.org> - 3.8.1-1
+* Thu Feb 28 2013 Alan Bartlett <ajb@elrepo.org> - 3.8.1-1
 - Updated with the 3.8.1 source tarball.
 - CONFIG_IPV6_SUBTREES=y and CONFIG_IPV6_MROUTE_MULTIPLE_TABLES=y [http://elrepo.org/bugs/view.php?id=354]
 
