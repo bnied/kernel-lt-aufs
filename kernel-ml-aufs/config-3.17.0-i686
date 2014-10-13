@@ -1824,6 +1824,7 @@ CONFIG_VMWARE_VMCI=m
 #
 # Intel MIC Host Driver
 #
+CONFIG_INTEL_MIC_BUS=m
 
 #
 # Intel MIC Card Driver
