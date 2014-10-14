@@ -4227,6 +4227,11 @@ CONFIG_VIDEO_EM28XX_DVB=m
 CONFIG_VIDEO_EM28XX_RC=m
 CONFIG_MEDIA_PCI_SUPPORT=y
 
+*
+* Software defined radio USB devices
+*
+CONFIG_USB_MSI2500=m
+
 #
 # Media capture support
 #
