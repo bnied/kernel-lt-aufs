@@ -3,6 +3,9 @@
 # Define the version of the Linux Kernel Archive tarball.
 %define LKAver 3.19
 
+# Define the version of the aufs-standalone tarball
+%define AUFSver aufs3-standalone
+
 # Define the buildid, if required.
 #define buildid .
 
@@ -172,9 +175,7 @@ Source0: ftp://ftp.kernel.org/pub/linux/kernel/v3.x/linux-%{LKAver}.tar.xz
 Source1: config-%{version}-i686
 Source2: config-%{version}-i686-NONPAE
 Source3: config-%{version}-x86_64
-
-# Do not package the source tarball.
-NoSource: 0
+Source4: %{AUFSver}.tar
 
 %description
 This package provides the Linux kernel (vmlinuz), the core of any
