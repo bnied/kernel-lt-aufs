@@ -310,7 +310,16 @@ This package provides the perf tool and the supporting documentation.
 %prep
 %setup -q -n %{name}-%{version} -c
 %{__mv} linux-%{LKAver} linux-%{version}-%{release}.%{_target_cpu}
+mkdir %{AUFSver}
+tar xf %{SOURCE4} -C %{AUFSver}
 pushd linux-%{version}-%{release}.%{_target_cpu} > /dev/null
+cp -r ../%{AUFSver}/Documentation/filesystems Documentation/
+cp -r ../%{AUFSver}/Documentation/ABI Documentation/
+cp -r ../%{AUFSver}/fs/aufs fs/
+cp ../%{AUFSver}/include/uapi/linux/aufs_type.h include/uapi/linux/
+patch -p 1 < ../%{AUFSver}/aufs3-kbuild.patch
+patch -p 1 < ../%{AUFSver}/aufs3-base.patch
+patch -p 1 < ../%{AUFSver}/aufs3-mmap.patch
 %{__cp} %{SOURCE1} .
 %{__cp} %{SOURCE2} .
 %{__cp} %{SOURCE3} .
