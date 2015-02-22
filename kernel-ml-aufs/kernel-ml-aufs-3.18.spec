@@ -177,9 +177,6 @@ Source2: config-%{version}-i686-NONPAE
 Source3: config-%{version}-x86_64
 Source4: %{AUFSver}.tar
 
-# Do not package the source tarball.
-NoSource: 0
-
 %description
 This package provides the Linux kernel (vmlinuz), the core of any
 Linux-based operating system. The kernel handles the basic functions
