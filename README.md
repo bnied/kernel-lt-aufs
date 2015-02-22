@@ -19,7 +19,7 @@ Run the `build_kernel.sh` script, and answer all three questions. This will auto
     What version of CentOS/RHEL do you want to build for? (6 or 7)
     7
 
-If you'd rather run through the steps manually, you can do so with the instructions below. Be sure to change `epel-6-x86_64` to `epel-7-x86_64` the filename for the source RPM to the EL7 equivalent if you're building for EL7.
+If you'd rather run through the steps manually, you can do so with the instructions below. Be sure to change `epel-6-x86_64` to `epel-7-x86_64` and the filename for the source RPM if you're building for EL7.
 
 Additionally,  `f60288dc0e0aab77ca545f42d785ec280f4700b9` was the latest commit of the `aufs3.19` branch at the time of this writing. When you build your kernel versions, be sure to update this step to the latest commit.
     
