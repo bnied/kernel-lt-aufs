@@ -9,7 +9,7 @@ Be aware that building the kernel can take a long time (at least half an hour, u
 
 To build the packages, there are two options:
 
-- Run the `build_kernel.sh` script, and answer all three questions. This will automate the build:
+Run the `build_kernel.sh` script, and answer all three questions. This will automate the build:
 
     $ ./build_kernel.sh 
     What kernel version do you want to build? (major version only)
@@ -19,9 +19,9 @@ To build the packages, there are two options:
     What version of CentOS/RHEL do you want to build for? (6 or 7)
     7
 
-- Run the following commands manually. If you want to build these for RHEL/CentOS 7, change `epel-6-x86_64` to `epel-7-x86_64`, and make sure that you change the filename for the source RPM to the EL7 equivalent.
+If you'd rather run through the steps manually, you can do so with the instructions below. Be sure to change `epel-6-x86_64` to `epel-7-x86_64` the filename for the source RPM to the EL7 equivalent if you're building for EL7.
 
-**NOTE**: `f60288dc0e0aab77ca545f42d785ec280f4700b9` was the latest commit of the `aufs3.19` branch at the time of this writing. When you build your kernel versions, be sure to update this step to the latest commit.
+Additionally,  `f60288dc0e0aab77ca545f42d785ec280f4700b9` was the latest commit of the `aufs3.19` branch at the time of this writing. When you build your kernel versions, be sure to update this step to the latest commit.
     
     spectool -g -C kernel-ml-aufs kernel-ml-aufs/kernel-ml-aufs-3.19.spec
     git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs3.19
