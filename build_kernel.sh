@@ -25,7 +25,7 @@ fi
 FULL_VERSION=`cat kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec | grep "%define LKAver" | awk '{print $3}'`
 
 # If we only have two parts to our version number, append ".0" to the end
-VERSION_ARRAY=$(echo $FULL_VERSION | tr "." "\n")
+VERSION_ARRAY=(`echo $FULL_VERSION | tr "." "\n"`)
 if [ ${#VERSION_ARRAY[@]} -le 2 ]; then
 	FULL_VERSION="$FULL_VERSION.0"
 fi
