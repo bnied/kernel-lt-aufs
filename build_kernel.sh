@@ -17,8 +17,8 @@ read EL_VERSION
 
 # If our spec file is missing, exit
 if [ ! -f kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec ]; then
-	echo "Spec file not found for version $VERSION"
-	exit 1
+  echo "Spec file not found for version $VERSION"
+  exit 1
 fi
 
 # Get minor config version from spec file
@@ -27,13 +27,13 @@ FULL_VERSION=`cat kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec | grep "%define LK
 # If we only have two parts to our version number, append ".0" to the end
 VERSION_ARRAY=(`echo $FULL_VERSION | tr "." "\n"`)
 if [ ${#VERSION_ARRAY[@]} -le 2 ]; then
-	FULL_VERSION="$FULL_VERSION.0"
+  FULL_VERSION="$FULL_VERSION.0"
 fi
 
 # If our kernel config is missing, exit
 if [ ! -f kernel-ml-aufs/config-$FULL_VERSION-$ARCH ]; then
-	echo "Config file not found for $FULL_VERSION-$ARCH"
-	exit 1
+  echo "Config file not found for $FULL_VERSION-$ARCH"
+  exit 1
 fi
 
 # Copy everything to a temp directory
@@ -67,18 +67,19 @@ mock -r epel-$EL_VERSION-x86_64 --buildsrpm --spec kernel-ml-aufs/kernel-ml-aufs
 
 # If successful, create our binary RPMs
 if [ $? -eq 0 ]; then
-	echo "Source RPM created. Building binary RPMs..."
-	mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-$FULL_VERSION-1.el$EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
+  echo "Source RPM created. Building binary RPMs..."
+  mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-$FULL_VERSION-1.el$EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
 fi
 
 if [ $? -eq 0 ]; then
-	mkdir ~/RPMs
-	echo "Binary RPMs created successfully! Moving to ~/RPMs"
-	mv output/*.rpm ~/RPMs
-	echo "Removing temp directory..."
-	rm -rf temp
+  mkdir ~/RPMs
+  echo "Binary RPMs created successfully! Moving to ~/RPMs"
+  mv output/*.rpm ~/RPMs
+  echo "Removing temp directory..."
+  cd ..
+  rm -rf temp
 else
-	echo "Binary RPM creation failed! See logs for details."
+  echo "Binary RPM creation failed! See logs for details."
 fi
 
 
