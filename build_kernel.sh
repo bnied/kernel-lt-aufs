@@ -72,10 +72,9 @@ if [ $? -eq 0 ]; then
 fi
 
 if [ $? -eq 0 ]; then
-	PWD=`pwd`
-	mkdir $PWD/RPMs
-	echo "Binary RPMs created successfully! Moving to $PWD/RPMs"
-	mv temp/output/*.rpm $PWD/RPMs
+	mkdir ~/RPMs
+	echo "Binary RPMs created successfully! Moving to ~/RPMs"
+	mv output/*.rpm ~/RPMs
 	echo "Removing temp directory..."
 	rm -rf temp
 else
