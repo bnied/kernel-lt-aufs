@@ -73,7 +73,7 @@ fi
 
 if [ $? -eq 0 ]; then
   mkdir ~/RPMs
-  echo "Binary RPMs created successfully! Moving to ~/RPMs"
+  echo "Binary RPMs created successfully! Moving to ~/RPMs..."
   mv output/*.rpm ~/RPMs
   echo "Removing temp directory..."
   cd ..
