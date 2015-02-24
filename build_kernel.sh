@@ -16,10 +16,10 @@ echo "What version of CentOS/RHEL do you want to build for? (6 or 7)"
 read EL_VERSION
 
 # Thanks CentOS 7, you're a shining example of "worse is better"
-if [ $EL_VERSION=7 ]; then
-  $RPM_EL_VERSION="el7.centos"
+if [ $EL_VERSION -eq 7 ]; then
+  RPM_EL_VERSION="el7.centos"
 else
-  $RPM_EL_VERSION="el6"
+  RPM_EL_VERSION="el6"
 fi
 
 # If our spec file is missing, exit
