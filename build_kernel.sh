@@ -15,6 +15,13 @@ read ARCH
 echo "What version of CentOS/RHEL do you want to build for? (6 or 7)"
 read EL_VERSION
 
+# Thanks CentOS 7, you're a shining example of "worse is better"
+if [ $EL_VERSION=7 ]; then
+  $RPM_EL_VERSION="el7.centos"
+else
+  $RPM_EL_VERSION="el6"
+fi
+
 # If our spec file is missing, exit
 if [ ! -f kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec ]; then
   echo "Spec file not found for version $VERSION"
@@ -68,7 +75,7 @@ mock -r epel-$EL_VERSION-x86_64 --buildsrpm --spec kernel-ml-aufs/kernel-ml-aufs
 # If successful, create our binary RPMs
 if [ $? -eq 0 ]; then
   echo "Source RPM created. Building binary RPMs..."
-  mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-$FULL_VERSION-1.el$EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
+  mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
 fi
 
 if [ $? -eq 0 ]; then
