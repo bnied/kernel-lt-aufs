@@ -1,6 +1,8 @@
 RHEL-AUFS-Kernel: `kernel-ml` with AUFS Support
 =============================================================================
 
+*NOTE*: If you don't feel like building these yourself, you can dowload the packages from https://yum.spaceduck.org/.
+
 This repository contains the specfile and config files to build [kernel-ml](http://elrepo.org/tiki/kernel-ml) kernels that include AUFS for use with Docker. The Docker spec files that were part of the original repo are no longer included. Use Docker from [EPEL](https://admin.fedoraproject.org/pkgdb/acls/name/docker-io) instead.
 
 Before building the packages, be sure to install [fedora-packager](https://dl.fedoraproject.org/pub/epel/6/x86_64/repoview/fedora-packager.html) and add yourself to the _mock_ group.
