@@ -80,6 +80,9 @@ mock -r epel-$EL_VERSION-x86_64 --buildsrpm --spec kernel-ml-aufs/kernel-ml-aufs
 if [ $? -eq 0 ]; then
   echo "Source RPM created. Building binary RPMs..."
   mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
+else
+  echo "Could not create source RPM! Exiting!"
+  exit 1
 fi
 
 if [ $? -eq 0 ]; then
