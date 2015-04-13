@@ -177,9 +177,6 @@ Source2: config-%{version}-i686-NONPAE
 Source3: config-%{version}-x86_64
 Source4: %{AUFSver}.tar
 
-# Do not package the source tarball.
-NoSource: 0
-
 %description
 This package provides the Linux kernel (vmlinuz), the core of any
 Linux-based operating system. The kernel handles the basic functions
@@ -310,7 +307,6 @@ This package provides the perf tool and the supporting documentation.
 # Disable the building of the debug package(s).
 %define debug_package %{nil}
 
-%prep
 %prep
 %setup -q -n %{name}-%{version} -c
 %{__mv} linux-%{LKAver} linux-%{version}-%{release}.%{_target_cpu}
