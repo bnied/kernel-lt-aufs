@@ -3,6 +3,9 @@
 # Define the version of the Linux Kernel Archive tarball.
 %define LKAver 4.0
 
+# Define the version of the aufs-standalone tarball
+%define AUFSver aufs3-standalone
+
 # Define the buildid, if required.
 #define buildid .
 
@@ -10,15 +13,15 @@
 # Use either --without <option> on your rpmbuild command line
 # or force the values to 0, here, to disable them.
 
-# kernel-ml
+# kernel-ml-aufs
 %define with_std          %{?_without_std:          0} %{?!_without_std:          1}
-# kernel-ml-NONPAE
+# kernel-ml-aufs-NONPAE
 %define with_nonpae       %{?_without_nonpae:       0} %{?!_without_nonpae:       1}
-# kernel-ml-doc
+# kernel-ml-aufs-doc
 %define with_doc          %{?_without_doc:          0} %{?!_without_doc:          1}
-# kernel-ml-headers
+# kernel-ml-aufs-headers
 %define with_headers      %{?_without_headers:      0} %{?!_without_headers:      1}
-# kernel-ml-firmware
+# kernel-ml-aufs-firmware
 %define with_firmware     %{?_without_firmware:     0} %{?!_without_firmware:     1}
 # perf subpackage
 %define with_perf         %{?_without_perf:         0} %{?!_without_perf:         1}
@@ -27,7 +30,7 @@
 # use dracut instead of mkinitrd
 %define with_dracut       %{?_without_dracut:       0} %{?!_without_dracut:       1}
 
-# Build only the kernel-ml-doc & kernel-ml-firmware packages.
+# Build only the kernel-ml-aufs-doc & kernel-ml-aufs-firmware packages.
 %ifarch noarch
 %define with_std 0
 %define with_nonpae 0
@@ -36,7 +39,7 @@
 %define with_vdso_install 0
 %endif
 
-# Build only the 32-bit kernel-ml-headers package.
+# Build only the 32-bit kernel-ml-aufs-headers package.
 %ifarch i386
 %define with_std 0
 %define with_nonpae 0
@@ -46,14 +49,14 @@
 %define with_vdso_install 0
 %endif
 
-# Build only the 32-bit kernel-ml packages.
+# Build only the 32-bit kernel-ml-aufs packages.
 %ifarch i686
 %define with_doc 0
 %define with_headers 0
 %define with_firmware 0
 %endif
 
-# Build only the 64-bit kernel-ml-headers & kernel-ml packages.
+# Build only the 64-bit kernel-ml-aufs-headers & kernel-ml-aufs packages.
 %ifarch x86_64
 %define with_nonpae 0
 %define with_doc 0
@@ -117,7 +120,7 @@
 %define initrd_prereq mkinitrd >= 6.0.61-1
 %endif
 
-Name: kernel-ml
+Name: kernel-ml-aufs
 Summary: The Linux kernel. (The core of any Linux-based operating system.)
 Group: System Environment/Kernel
 License: GPLv2
@@ -132,12 +135,12 @@ Provides: kernel-drm = 4.3.0
 Provides: kernel-drm-nouveau = 16
 Provides: kernel-modeset = 1
 Provides: kernel-uname-r = %{version}-%{release}.%{_target_cpu}
-Provides: kernel-ml = %{version}-%{release}
-Provides: kernel-ml-%{_target_cpu} = %{version}-%{release}
-Provides: kernel-ml-drm = 4.3.0
-Provides: kernel-ml-drm-nouveau = 16
-Provides: kernel-ml-modeset = 1
-Provides: kernel-ml-uname-r = %{version}-%{release}.%{_target_cpu}
+Provides: kernel-ml-aufs = %{version}-%{release}
+Provides: kernel-ml-aufs-%{_target_cpu} = %{version}-%{release}
+Provides: kernel-ml-aufs-drm = 4.3.0
+Provides: kernel-ml-aufs-drm-nouveau = 16
+Provides: kernel-ml-aufs-modeset = 1
+Provides: kernel-ml-aufs-uname-r = %{version}-%{release}.%{_target_cpu}
 Requires(pre): %{kernel_prereq}
 Requires(pre): %{initrd_prereq}
 Requires(post): /sbin/new-kernel-pkg
@@ -147,12 +150,12 @@ Conflicts: %{package_conflicts}
 Conflicts: %{kernel_headers_conflicts}
 # We can't let RPM do the dependencies automatically because it'll then pick up
 # a correct but undesirable perl dependency from the module headers which
-# isn't required for the kernel-ml proper to function.
+# isn't required for the kernel-ml-aufs proper to function.
 AutoReq: no
 AutoProv: yes
 
 #
-# List the packages used during the kernel-ml build.
+# List the packages used during the kernel-ml-aufs build.
 #
 BuildRequires: asciidoc, bash >= 2.03, bc, binutils >= 2.12, bzip2, diffutils
 BuildRequires: findutils, gawk, gcc >= 3.4.2, gzip, m4, make >= 3.78
@@ -172,6 +175,7 @@ Source0: ftp://ftp.kernel.org/pub/linux/kernel/v3.x/linux-%{LKAver}.tar.xz
 Source1: config-%{version}-i686
 Source2: config-%{version}-i686-NONPAE
 Source3: config-%{version}-x86_64
+Source4: %{AUFSver}.tar
 
 # Do not package the source tarball.
 NoSource: 0
@@ -187,9 +191,9 @@ Group: System Environment/Kernel
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}
 Provides: kernel-devel = %{version}-%{release}
 Provides: kernel-devel-uname-r = %{version}-%{release}.%{_target_cpu}
-Provides: kernel-ml-devel-%{_target_cpu} = %{version}-%{release}
-Provides: kernel-ml-devel = %{version}-%{release}
-Provides: kernel-ml-devel-uname-r = %{version}-%{release}.%{_target_cpu}
+Provides: kernel-ml-aufs-devel-%{_target_cpu} = %{version}-%{release}
+Provides: kernel-ml-aufs-devel = %{version}-%{release}
+Provides: kernel-ml-aufs-devel-uname-r = %{version}-%{release}.%{_target_cpu}
 Requires(pre): /usr/bin/find
 AutoReqProv: no
 %description devel
@@ -208,14 +212,14 @@ Provides: kernel-drm = 4.3.0
 Provides: kernel-drm-nouveau = 16
 Provides: kernel-modeset = 1
 Provides: kernel-uname-r = %{version}-%{release}.%{_target_cpu}
-Provides: kernel-ml = %{version}-%{release}
-Provides: kernel-ml-%{_target_cpu} = %{version}-%{release}NONPAE
-Provides: kernel-ml-NONPAE = %{version}-%{release}
-Provides: kernel-ml-NONPAE-%{_target_cpu} = %{version}-%{release}NONPAE
-Provides: kernel-ml-drm = 4.3.0
-Provides: kernel-ml-drm-nouveau = 16
-Provides: kernel-ml-modeset = 1
-Provides: kernel-ml-uname-r = %{version}-%{release}.%{_target_cpu}
+Provides: kernel-ml-aufs = %{version}-%{release}
+Provides: kernel-ml-aufs-%{_target_cpu} = %{version}-%{release}NONPAE
+Provides: kernel-ml-aufs-NONPAE = %{version}-%{release}
+Provides: kernel-ml-aufs-NONPAE-%{_target_cpu} = %{version}-%{release}NONPAE
+Provides: kernel-ml-aufs-drm = 4.3.0
+Provides: kernel-ml-aufs-drm-nouveau = 16
+Provides: kernel-ml-aufs-modeset = 1
+Provides: kernel-ml-aufs-uname-r = %{version}-%{release}.%{_target_cpu}
 Requires(pre): %{kernel_prereq}
 Requires(pre): %{initrd_prereq}
 Requires(post): /sbin/new-kernel-pkg
@@ -225,7 +229,7 @@ Conflicts: %{package_conflicts}
 Conflicts: %{kernel_headers_conflicts}
 # We can't let RPM do the dependencies automatically because it'll then pick up
 # a correct but undesirable perl dependency from the module headers which
-# isn't required for the kernel-ml proper to function.
+# isn't required for the kernel-ml-aufs proper to function.
 AutoReq: no
 AutoProv: yes
 %description NONPAE
@@ -239,9 +243,9 @@ Group: System Environment/Kernel
 Provides: kernel-NONPAE-devel-%{_target_cpu} = %{version}-%{release}
 Provides: kernel-NONPAE-devel = %{version}-%{release}NONPAE
 Provides: kernel-NONPAE-devel-uname-r = %{version}-%{release}.%{_target_cpu}
-Provides: kernel-ml-NONPAE-devel-%{_target_cpu} = %{version}-%{release}
-Provides: kernel-ml-NONPAE-devel = %{version}-%{release}NONPAE
-Provides: kernel-ml-NONPAE-devel-uname-r = %{version}-%{release}.%{_target_cpu}
+Provides: kernel-ml-aufs-NONPAE-devel-%{_target_cpu} = %{version}-%{release}
+Provides: kernel-ml-aufs-NONPAE-devel = %{version}-%{release}NONPAE
+Provides: kernel-ml-aufs-NONPAE-devel-uname-r = %{version}-%{release}.%{_target_cpu}
 Requires(pre): /usr/bin/find
 AutoReqProv: no
 %description NONPAE-devel
@@ -307,9 +311,19 @@ This package provides the perf tool and the supporting documentation.
 %define debug_package %{nil}
 
 %prep
+%prep
 %setup -q -n %{name}-%{version} -c
 %{__mv} linux-%{LKAver} linux-%{version}-%{release}.%{_target_cpu}
+mkdir %{AUFSver}
+tar xf %{SOURCE4} -C %{AUFSver}
 pushd linux-%{version}-%{release}.%{_target_cpu} > /dev/null
+cp -r ../%{AUFSver}/Documentation/filesystems Documentation/
+cp -r ../%{AUFSver}/Documentation/ABI Documentation/
+cp -r ../%{AUFSver}/fs/aufs fs/
+cp ../%{AUFSver}/include/uapi/linux/aufs_type.h include/uapi/linux/
+patch -p 1 < ../%{AUFSver}/aufs3-kbuild.patch
+patch -p 1 < ../%{AUFSver}/aufs3-base.patch
+patch -p 1 < ../%{AUFSver}/aufs3-mmap.patch
 %{__cp} %{SOURCE1} .
 %{__cp} %{SOURCE2} .
 %{__cp} %{SOURCE3} .
@@ -360,7 +374,7 @@ BuildKernel() {
 %ifarch %{vdso_arches}
     %{__make} -s ARCH=%{buildarch} INSTALL_MOD_PATH=$RPM_BUILD_ROOT KERNELRELEASE=%{KVRFA} vdso_install
     if grep '^CONFIG_XEN=y$' .config > /dev/null; then
-      echo > ldconfig-kernel-ml.conf "\
+      echo > ldconfig-kernel-ml-aufs.conf "\
 # This directive teaches ldconfig to search in nosegneg subdirectories
 # and cache the DSOs there with extra bit 1 set in their hwcap match
 # fields.  In Xen guest kernels, the vDSO tells the dynamic linker to
@@ -368,11 +382,11 @@ BuildKernel() {
 # in the ld.so.cache file.
 hwcap 1 nosegneg"
     fi
-    if [ ! -s ldconfig-kernel-ml.conf ]; then
-      echo > ldconfig-kernel-ml.conf "\
+    if [ ! -s ldconfig-kernel-ml-aufs.conf ]; then
+      echo > ldconfig-kernel-ml-aufs.conf "\
 # Placeholder file, no vDSO hwcap entries used in this kernel."
     fi
-    %{__install} -D -m 444 ldconfig-kernel-ml.conf $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernel-ml-%{KVRFA}.conf
+    %{__install} -D -m 444 ldconfig-kernel-ml-aufs.conf $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernel-ml-aufs-%{KVRFA}.conf
 %endif
 
     # Save the headers/makefiles, etc, for building modules against.
@@ -595,23 +609,23 @@ if [ $? -ne 0 ]; then
         NEWKERNARGS="--kernel-args=\"crashkernel=auto\""
 fi
 %if %{with_dracut}
-/sbin/new-kernel-pkg --package kernel-ml --mkinitrd --dracut --depmod --update %{version}-%{release}.%{_target_cpu} $NEWKERNARGS || exit $?
+/sbin/new-kernel-pkg --package kernel-ml-aufs --mkinitrd --dracut --depmod --update %{version}-%{release}.%{_target_cpu} $NEWKERNARGS || exit $?
 %else
-/sbin/new-kernel-pkg --package kernel-ml --mkinitrd --depmod --update %{version}-%{release}.%{_target_cpu} $NEWKERNARGS || exit $?
+/sbin/new-kernel-pkg --package kernel-ml-aufs --mkinitrd --depmod --update %{version}-%{release}.%{_target_cpu} $NEWKERNARGS || exit $?
 %endif
-/sbin/new-kernel-pkg --package kernel-ml --rpmposttrans %{version}-%{release}.%{_target_cpu} || exit $?
+/sbin/new-kernel-pkg --package kernel-ml-aufs --rpmposttrans %{version}-%{release}.%{_target_cpu} || exit $?
 if [ -x /sbin/weak-modules ]; then
     /sbin/weak-modules --add-kernel %{version}-%{release}.%{_target_cpu} || exit $?
 fi
 
 %post
 if [ `uname -i` == "i386" ] && [ -f /etc/sysconfig/kernel ]; then
-    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-ml-NONPAE$/DEFAULTKERNEL=kernel-ml/' /etc/sysconfig/kernel || exit $?
+    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-ml-aufs-NONPAE$/DEFAULTKERNEL=kernel-ml-aufs/' /etc/sysconfig/kernel || exit $?
 fi
 if grep --silent '^hwcap 0 nosegneg$' /etc/ld.so.conf.d/kernel-*.conf 2> /dev/null; then
     /bin/sed -i '/^hwcap 0 nosegneg$/ s/0/1/' /etc/ld.so.conf.d/kernel-*.conf
 fi
-/sbin/new-kernel-pkg --package kernel-ml --install %{version}-%{release}.%{_target_cpu} || exit $?
+/sbin/new-kernel-pkg --package kernel-ml-aufs --install %{version}-%{release}.%{_target_cpu} || exit $?
 
 %preun
 /sbin/new-kernel-pkg --rminitrd --rmmoddep --remove %{version}-%{release}.%{_target_cpu} || exit $?
@@ -640,20 +654,20 @@ if [ $? -ne 0 ]; then
     NEWKERNARGS="--kernel-args=\"crashkernel=auto\""
 fi
 %if %{with_dracut}
-/sbin/new-kernel-pkg --package kernel-ml-NONPAE --mkinitrd --dracut --depmod --update %{version}-%{release}NONPAE.%{_target_cpu} $NEWKERNARGS || exit $?
+/sbin/new-kernel-pkg --package kernel-ml-aufs-NONPAE --mkinitrd --dracut --depmod --update %{version}-%{release}NONPAE.%{_target_cpu} $NEWKERNARGS || exit $?
 %else
-/sbin/new-kernel-pkg --package kernel-ml-NONPAE --mkinitrd --depmod --update %{version}-%{release}NONPAE.%{_target_cpu} $NEWKERNARGS || exit $?
+/sbin/new-kernel-pkg --package kernel-ml-aufs-NONPAE --mkinitrd --depmod --update %{version}-%{release}NONPAE.%{_target_cpu} $NEWKERNARGS || exit $?
 %endif
-/sbin/new-kernel-pkg --package kernel-ml-NONPAE --rpmposttrans %{version}-%{release}NONPAE.%{_target_cpu} || exit $?
+/sbin/new-kernel-pkg --package kernel-ml-aufs-NONPAE --rpmposttrans %{version}-%{release}NONPAE.%{_target_cpu} || exit $?
 if [ -x /sbin/weak-modules ]; then
     /sbin/weak-modules --add-kernel %{version}-%{release}NONPAE.%{_target_cpu} || exit $?
 fi
 
 %post NONPAE
 if [ `uname -i` == "i386" ] && [ -f /etc/sysconfig/kernel ]; then
-    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-ml$/DEFAULTKERNEL=kernel-ml-NONPAE/' /etc/sysconfig/kernel || exit $?
+    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-ml-aufs$/DEFAULTKERNEL=kernel-ml-aufs-NONPAE/' /etc/sysconfig/kernel || exit $?
 fi
-/sbin/new-kernel-pkg --package kernel-ml-NONPAE --install %{version}-%{release}NONPAE.%{_target_cpu} || exit $?
+/sbin/new-kernel-pkg --package kernel-ml-aufs-NONPAE --install %{version}-%{release}NONPAE.%{_target_cpu} || exit $?
 
 %preun NONPAE
 /sbin/new-kernel-pkg --rminitrd --rmmoddep --remove %{version}-%{release}NONPAE.%{_target_cpu} || exit $?
@@ -691,7 +705,7 @@ fi
 /lib/modules/%{version}-%{release}.%{_target_cpu}/weak-updates
 %ifarch %{vdso_arches}
 /lib/modules/%{version}-%{release}.%{_target_cpu}/vdso
-/etc/ld.so.conf.d/kernel-ml-%{version}-%{release}.%{_target_cpu}.conf
+/etc/ld.so.conf.d/kernel-ml-aufs-%{version}-%{release}.%{_target_cpu}.conf
 %endif
 /lib/modules/%{version}-%{release}.%{_target_cpu}/modules.*
 %if %{with_dracut}
@@ -722,7 +736,7 @@ fi
 /lib/modules/%{version}-%{release}NONPAE.%{_target_cpu}/weak-updates
 %ifarch %{vdso_arches}
 /lib/modules/%{version}-%{release}NONPAE.%{_target_cpu}/vdso
-/etc/ld.so.conf.d/kernel-ml-%{version}-%{release}NONPAE.%{_target_cpu}.conf
+/etc/ld.so.conf.d/kernel-ml-aufs-%{version}-%{release}NONPAE.%{_target_cpu}.conf
 %endif
 /lib/modules/%{version}-%{release}NONPAE.%{_target_cpu}/modules.*
 %if %{with_dracut}
@@ -786,6 +800,9 @@ fi
 %endif
 
 %changelog
+* Sat Feb 21 2015 Ben Nied <spacewreckage@gmail.com> - aufs-4.0.0-1
+- Added AUFS support for the 4.0 kernel.
+
 * Mon Apr 13 2015 Alan Bartlett <ajb@elrepo.org> - 4.0.0-1
 - Updated with the 4.0 source tarball.
 
