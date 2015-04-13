@@ -796,7 +796,7 @@ fi
 %endif
 
 %changelog
-* Sat Feb 21 2015 Ben Nied <spacewreckage@gmail.com> - aufs-4.0.0-1
+* Mon Apr 13 2015 Ben Nied <spacewreckage@gmail.com> - aufs-4.0.0-1
 - Added AUFS support for the 4.0 kernel.
 
 * Mon Apr 13 2015 Alan Bartlett <ajb@elrepo.org> - 4.0.0-1
