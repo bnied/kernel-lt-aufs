@@ -59,7 +59,7 @@ echo "Grabbing kernel source..."
 spectool -g -C kernel-ml-aufs kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec > logs/spectool.log 2>&1
 
 # Clone the AUFS repo
-if [ $EL_VERSION -eq "4.0" ]; then
+if [ "$EL_VERSION" == "4.0" ]; then
   git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs3.19 > logs/aufs-git.log 2>&1
 else
   git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs$VERSION > logs/aufs-git.log 2>&1
