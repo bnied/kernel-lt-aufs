@@ -59,7 +59,7 @@ echo "Grabbing kernel source..."
 spectool -g -C kernel-ml-aufs kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec > logs/spectool.log 2>&1
 
 # Clone the AUFS repo
-if [ $VERSION =~ ^4 ]; then
+if [[ $VERSION =~ ^4 ]]; then
   echo "Cloning AUFS 4.x..."
   git clone git://github.com/sfjro/aufs4-standalone.git -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1
 else
