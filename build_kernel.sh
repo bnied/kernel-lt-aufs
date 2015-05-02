@@ -60,8 +60,10 @@ spectool -g -C kernel-ml-aufs kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec > logs
 
 # Clone the AUFS repo
 if [ $VERSION == 4* ]; then
+  echo "Cloning AUFS 4.x..."
   git clone git://github.com/sfjro/aufs4-standalone.git -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1
 else
+  echo "Cloning AUFS 3.x..."
   git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1
 fi
 
