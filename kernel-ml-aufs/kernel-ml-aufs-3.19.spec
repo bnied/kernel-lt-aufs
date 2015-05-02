@@ -4,7 +4,7 @@
 %define LKAver 3.19.3
 
 # Define the version of the aufs-standalone tarball
-%define AUFSver aufs3-standalone
+%define AUFSver aufs-standalone
 
 # Define the buildid, if required.
 #define buildid .

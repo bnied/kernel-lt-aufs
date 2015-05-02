@@ -59,17 +59,17 @@ echo "Grabbing kernel source..."
 spectool -g -C kernel-ml-aufs kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec > logs/spectool.log 2>&1
 
 # Clone the AUFS repo
-if [ "$EL_VERSION" == "4.0" ]; then
-  git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs3.19 > logs/aufs-git.log 2>&1
+if [ $VERSIONs == 4* ]; then
+  git clone git://github.com/sfjro/aufs4-standalone.git -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1
 else
-  git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs$VERSION > logs/aufs-git.log 2>&1
+  git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1
 fi
 
 # Get the HEAD commit from the aufs tree
 echo "Cloning AUFS source into our kernel sources..."
-pushd aufs3-standalone
+pushd aufs-standalone
 HEAD_COMMIT=`git rev-parse --short HEAD 2> /dev/null`
-git archive $HEAD_COMMIT > ../kernel-ml-aufs/aufs3-standalone.tar
+git archive $HEAD_COMMIT > ../kernel-ml-aufs/aufs-standalone.tar
 popd
 
 # Create our SRPM
@@ -94,6 +94,5 @@ if [ $? -eq 0 ]; then
   rm -rf temp
 else
   echo "Binary RPM creation failed! See logs for details."
+  exit 1
 fi
-
-
