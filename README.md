@@ -24,7 +24,7 @@ To build the packages, there are two options.
 
 ### Using the Build Script
 
-Run the `build_kernel.sh` script, and answer all three questions. This will automate the build:
+Run the `build_kernel.sh` script, and answer all three questions:
 
     $ ./build_kernel.sh
     What kernel version do you want to build? (major version only)
@@ -34,7 +34,7 @@ Run the `build_kernel.sh` script, and answer all three questions. This will auto
     What version of CentOS/RHEL do you want to build for? (6 or 7)
     7
 
-Logs can be found in two places.
+This will build your packages automatically. Logs for the build can be found in two places:
 * `$(REPO_LOCATION)/temp/logs` has the output from each command in separate log files.
 * `$(REPO_LOCATION)/temp/output` contains the `mock` logs so you can see where the build went wrong (if it went wrong at all).
 
@@ -62,7 +62,7 @@ The resulting RPMs will be placed in a directory named `output`.
 ***
 ### Installing the Packages
 
-Once your packages are build, you can install them with `yum`. `cd` to the appropriate directory, and run:
+Once your packages are built, you can install them with `yum`. `cd` to the appropriate directory, and run:
 
     yum localinstall --nogpgcheck kernel-ml-aufs-3.19.0-1.el6.x86_64.rpm
 
@@ -70,9 +70,9 @@ In order to use docker, you'll need to install it out of EPEL:
 
     yum install docker-io
 
-Reboot and choose the 3.xx kernel from your GRUB menu (or edit _/boot/grub/grub.conf_ and change your default kernel).
+Reboot and choose the 3.xx kernel from your GRUB menu (or edit `/boot/grub/grub.conf` and change your default kernel).
 
-If everything works as expected, you should see that AUFS is your storage driver when you run `docker info`:
+If everything is working as expected, you should see that AUFS is your storage driver when you run `docker info`:
 
     [bnied@buildbox ~]$ sudo docker info
     Containers: 0
