@@ -321,8 +321,8 @@ cp ../%{AUFSver}/include/uapi/linux/aufs_type.h include/uapi/linux/
 patch -p 1 < ../%{AUFSver}/aufs4-kbuild.patch
 patch -p 1 < ../%{AUFSver}/aufs4-base.patch
 patch -p 1 < ../%{AUFSver}/aufs4-mmap.patch
-%{__cp} %{SOURCE1} .
-%{__cp} %{SOURCE2} .
+#%{__cp} %{SOURCE1} .
+#%{__cp} %{SOURCE2} .
 %{__cp} %{SOURCE3} .
 popd > /dev/null
 
