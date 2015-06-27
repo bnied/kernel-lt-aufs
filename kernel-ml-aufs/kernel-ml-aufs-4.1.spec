@@ -173,8 +173,8 @@ BuildConflicts: rhbuildsys(DiskFree) < 7Gb
 
 # Sources.
 Source0: ftp://ftp.kernel.org/pub/linux/kernel/v4.x/linux-%{LKAver}.tar.xz
-Source1: config-%{version}-i686
-Source2: config-%{version}-i686-NONPAE
+#Source1: config-%{version}-i686
+#Source2: config-%{version}-i686-NONPAE
 Source3: config-%{version}-x86_64
 Source4: %{AUFSver}.tar
 
