@@ -23,7 +23,7 @@ else
 fi
 
 # If our spec file is missing, exit
-if [ ! -f kernel-ml-aufs/specs-el$EL_VERSION/$kernel-ml-aufs-$VERSION.spec ]; then
+if [ ! -f kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec ]; then
   echo "Spec file not found for version $VERSION"
   exit 1
 fi
