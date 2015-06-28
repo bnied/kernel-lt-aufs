@@ -61,7 +61,7 @@ if [[ $VERSION =~ ^4 ]]; then
   echo "Cloning AUFS 4.x..."
   git clone git://github.com/sfjro/aufs4-standalone.git -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1
   # Stupid workaround until 4.1 is tagged properly
-  if [ $? -neq 0 ]; then
+  if [[ $? -neq 0 ]]; then
     git clone git://github.com/sfjro/aufs4-standalone.git -b aufs4.x-rcN aufs-standalone > logs/aufs-git.log 2>&1
   fi
 else
@@ -78,7 +78,7 @@ popd
 
 # Create our SRPM
 echo "Creating source RPM..."
-mock -r epel-$EL_VERSION-x86_64 --buildsrpm --spec kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec --sources kernel-ml-aufs --resultdir output > logs/srpm_generation.log 2>&1
+mock -r epel-$EL_VERSION-x86_64 --buildsrpm --spec kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec --sources kernel-ml-aufs --resultdir output > logs/srpm_generation.log 2>&1
 
 # If successful, create our binary RPMs
 if [ $? -eq 0 ]; then
