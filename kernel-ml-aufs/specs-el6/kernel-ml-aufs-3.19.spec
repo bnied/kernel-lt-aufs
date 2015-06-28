@@ -173,10 +173,10 @@ BuildConflicts: rhbuildsys(DiskFree) < 7Gb
 
 # Sources.
 Source0: ftp://ftp.kernel.org/pub/linux/kernel/v3.x/linux-%{LKAver}.tar.xz
-Source1: ../configs-el6/config-%{version}-i686
-Source2: ../configs-el6/config-%{version}-i686-NONPAE
-Source3: ../configs-el6/config-%{version}-x86_64
-Source4: ../%{AUFSver}.tar
+Source1: config-%{version}-i686
+Source2: config-%{version}-i686-NONPAE
+Source3: config-%{version}-x86_64
+Source4: %{AUFSver}.tar
 
 %description
 This package provides the Linux kernel (vmlinuz), the core of any

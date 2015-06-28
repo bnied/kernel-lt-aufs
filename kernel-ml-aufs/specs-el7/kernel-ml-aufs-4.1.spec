@@ -13,11 +13,11 @@
 # Use either --without <option> on your rpmbuild command line
 # or force the values to 0, here, to disable them.
 
-# kernel-ml
+# kernel-ml-aufs
 %define with_default %{?_without_default: 0} %{?!_without_default: 1}
-# kernel-ml-doc
+# kernel-ml-aufs-doc
 %define with_doc     %{?_without_doc:     0} %{?!_without_doc:     1}
-# kernel-ml-headers
+# kernel-ml-aufs-headers
 %define with_headers %{?_without_headers: 0} %{?!_without_headers: 1}
 # perf
 %define with_perf    %{?_without_perf:    0} %{?!_without_perf:    1}
@@ -43,14 +43,14 @@
 %endif
 
 %ifarch i686
-# 32-bit kernel-ml, headers, perf & tools.
+# 32-bit kernel-ml-aufs, headers, perf & tools.
 %define buildarch i386
 %define hdrarch i386
 %define with_doc 0
 %endif
 
 %ifarch x86_64
-# 64-bit kernel-ml, headers, perf & tools.
+# 64-bit kernel-ml-aufs, headers, perf & tools.
 %define with_doc 0
 %endif
 
@@ -92,7 +92,7 @@
 %define kernel_prereq fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubby >= 8.28-2
 %define initrd_prereq dracut >= 001-7
 
-Name: kernel-ml
+Name: kernel-ml-aufs
 Summary: The Linux kernel. (The core of any Linux-based operating system.)
 Group: System Environment/Kernel
 License: GPLv2
@@ -110,12 +110,12 @@ Provides: kernel-uname-r = %{version}-%{release}.%{_target_cpu}
 Provides: kernel-drm = 4.3.0
 Provides: kernel-drm-nouveau = 16
 Provides: kernel-modeset = 1
-Provides: kernel-ml = %{version}-%{release}
-Provides: kernel-ml-%{_target_cpu} = %{version}-%{release}
-Provides: kernel-ml-uname-r = %{version}-%{release}.%{_target_cpu}
-Provides: kernel-ml-drm = 4.3.0
-Provides: kernel-ml-drm-nouveau = 16
-Provides: kernel-ml-modeset = 1
+Provides: kernel-ml-aufs = %{version}-%{release}
+Provides: kernel-ml-aufs-%{_target_cpu} = %{version}-%{release}
+Provides: kernel-ml-aufs-uname-r = %{version}-%{release}.%{_target_cpu}
+Provides: kernel-ml-aufs-drm = 4.3.0
+Provides: kernel-ml-aufs-drm-nouveau = 16
+Provides: kernel-ml-aufs-modeset = 1
 Requires(pre): %{kernel_prereq}
 Requires(pre): %{initrd_prereq}
 Requires(pre): linux-firmware >= 20100806-2
@@ -145,14 +145,11 @@ BuildRequires: gettext, pciutils, pciutils-devel, zlib-devel
 %endif
 
 # Sources.
-Source0: ftp://ftp.kernel.org/pub/linux/kernel/v3.x/linux-%{LKAver}.tar.xz
-Source3: ../configs-el7/config-%{version}-x86_64
-Source4: ../configs-el7/cpupower.service
-Source5: ../configs-el7/cpupower.config
-Source6: ../%{AUFSver}.tar
-
-# Do not package the source tarball.
-NoSource: 0
+Source0: ftp://ftp.kernel.org/pub/linux/kernel/v4.x/linux-%{LKAver}.tar.xz
+Source3: config-%{version}-x86_64
+Source4: cpupower.service
+Source5: cpupower.config
+Source6: %{AUFSver}.tar
 
 %description
 This package provides the Linux kernel (vmlinuz), the core of any
@@ -165,9 +162,9 @@ Group: System Environment/Kernel
 Provides: kernel-devel = %{version}-%{release}
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}
 Provides: kernel-devel-uname-r = %{version}-%{release}.%{_target_cpu}
-Provides: kernel-ml-devel = %{version}-%{release}
-Provides: kernel-ml-devel-%{_target_cpu} = %{version}-%{release}
-Provides: kernel-ml-devel-uname-r = %{version}-%{release}.%{_target_cpu}
+Provides: kernel-ml-aufs-devel = %{version}-%{release}
+Provides: kernel-ml-aufs-devel-%{_target_cpu} = %{version}-%{release}
+Provides: kernel-ml-aufs-devel-uname-r = %{version}-%{release}.%{_target_cpu}
 AutoReqProv: no
 Requires(pre): /usr/bin/find
 Requires: perl
@@ -180,7 +177,7 @@ sufficient to build modules against the kernel package.
 Summary: Various bits of documentation found in the kernel sources.
 Group: Documentation
 Provides: kernel-doc = %{version}-%{release}
-Provides: kernel-ml-doc = %{version}-%{release}
+Provides: kernel-ml-aufs-doc = %{version}-%{release}
 Conflicts: kernel-doc < %{version}-%{release}
 %description doc
 This package provides documentation files from the kernel sources.
@@ -198,7 +195,7 @@ Group: Development/System
 Obsoletes: glibc-kernheaders < 3.0-46
 Provides: glibc-kernheaders = 3.0-46
 Provides: kernel-headers = %{version}-%{release}
-Provides: kernel-ml-headers = %{version}-%{release}
+Provides: kernel-ml-aufs-headers = %{version}-%{release}
 Conflicts: kernel-headers < %{version}-%{release}
 %description headers
 This package provides the C header files that specify the interface
@@ -228,7 +225,7 @@ Python programming language to use the interface to manipulate perf events.
 %endif
 
 %if %{with_tools}
-%package -n kernel-ml-tools
+%package -n kernel-ml-aufs-tools
 Summary: Assortment of tools for the kernel.
 Group: Development/System
 License: GPLv2
@@ -239,32 +236,32 @@ Obsoletes: cpufreq-utils < 1:009-0.6.p1
 Provides:  cpufrequtils = 1:009-0.6.p1
 Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:2.0
-Requires: kernel-ml-tools-libs = %{version}-%{release}
+Requires: kernel-ml-aufs-tools-libs = %{version}-%{release}
 Conflicts: kernel-tools < %{version}-%{release}
-%description -n kernel-ml-tools
+%description -n kernel-ml-aufs-tools
 This package contains the tools/ directory and its supporting
 documentation, derived from the kernel source.
 
-%package -n kernel-ml-tools-libs
+%package -n kernel-ml-aufs-tools-libs
 Summary: Libraries for the kernel tools.
 Group: Development/System
 License: GPLv2
 Conflicts: kernel-tools-libs < %{version}-%{release}
-%description -n kernel-ml-tools-libs
+%description -n kernel-ml-aufs-tools-libs
 This package contains the libraries built from the
 tools/ directory, derived from the kernel source.
 
-%package -n kernel-ml-tools-libs-devel
+%package -n kernel-ml-aufs-tools-libs-devel
 Summary: Development package for the kernel tools libraries.
 Group: Development/System
 License: GPLv2
-Requires: kernel-ml-tools = %{version}-%{release}
-Requires: kernel-ml-tools-libs = %{version}-%{release}
+Requires: kernel-ml-aufs-tools = %{version}-%{release}
+Requires: kernel-ml-aufs-tools-libs = %{version}-%{release}
 Provides:  cpupowerutils-devel = 1:009-0.6.p1
 Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
-Provides: kernel-ml-tools-devel
+Provides: kernel-ml-aufs-tools-devel
 Conflicts: kernel-tools-libs-devel < %{version}-%{release}
-%description -n kernel-ml-tools-libs-devel
+%description -n kernel-ml-aufs-tools-libs-devel
 This package contains the development files for the tools/ directory
 libraries, derived from the kernel source.
 %endif
@@ -288,25 +285,8 @@ patch -p 1 < ../%{AUFSver}/aufs4-mmap.patch
 %{__cp} %{SOURCE3} .
 popd > /dev/null
 
-
-# Run make listnewconfig over all the configuration files.
-%ifarch i686 || x86_64
-for C in config-*-%{_target_cpu}*
-do
-    %{__cp} $C .config
-    %{__make} -s ARCH=%{buildarch} listnewconfig | grep -E '^CONFIG_' > .newoptions || true
-    if [ -s .newoptions ]; then
-        cat .newoptions
-    exit 1
-    fi
-    %{__rm} .newoptions
-done
-%endif
-
 # Remove unnecessary files.
 /usr/bin/find . -type f \( -name .gitignore -o -name .mailmap \) | xargs --no-run-if-empty %{__rm} -f
-
-popd > /dev/null
 
 %build
 BuildKernel() {
@@ -351,7 +331,7 @@ BuildKernel() {
     %{__make} -s ARCH=%{buildarch} INSTALL_MOD_PATH=$RPM_BUILD_ROOT KERNELRELEASE=%{KVRFA} vdso_install
     /usr/bin/find $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/vdso -type f -name 'vdso*.so' | xargs --no-run-if-empty %{__strip}
     if grep '^CONFIG_XEN=y$' .config > /dev/null; then
-        echo > ldconfig-kernel-ml.conf "\
+        echo > ldconfig-kernel-ml-aufs.conf "\
 # This directive teaches ldconfig to search in nosegneg subdirectories
 # and cache the DSOs there with extra bit 1 set in their hwcap match
 # fields.  In Xen guest kernels, the vDSO tells the dynamic linker to
@@ -359,11 +339,11 @@ BuildKernel() {
 # in the ld.so.cache file.
 hwcap 1 nosegneg"
     fi
-    if [ ! -s ldconfig-kernel-ml.conf ]; then
-        echo > ldconfig-kernel-ml.conf "\
+    if [ ! -s ldconfig-kernel-ml-aufs.conf ]; then
+        echo > ldconfig-kernel-ml-aufs.conf "\
 # Placeholder file, no vDSO hwcap entries used in this kernel."
     fi
-    %{__install} -D -m 444 ldconfig-kernel-ml.conf $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernel-ml-%{KVRFA}.conf
+    %{__install} -D -m 444 ldconfig-kernel-ml-aufs.conf $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernel-ml-aufs-%{KVRFA}.conf
 %endif
 
     # Save the headers/makefiles, etc, for building modules against.
@@ -564,7 +544,7 @@ fi
 %endif
 
 %if %{with_doc}
-DOCDIR=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-ml-doc-%{version}
+DOCDIR=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-ml-aufs-doc-%{version}
 MAN9DIR=$RPM_BUILD_ROOT%{_datadir}/man/man9
 
 # copy the source over
@@ -620,14 +600,14 @@ popd > /dev/null
 # Scripts section.
 %if %{with_default}
 %posttrans
-%{_sbindir}/new-kernel-pkg --package kernel-ml --mkinitrd --dracut --depmod --update %{version}-%{release}.%{_target_cpu} || exit $?
-%{_sbindir}/new-kernel-pkg --package kernel-ml --rpmposttrans %{version}-%{release}.%{_target_cpu} || exit $?
+%{_sbindir}/new-kernel-pkg --package kernel-ml-aufs --mkinitrd --dracut --depmod --update %{version}-%{release}.%{_target_cpu} || exit $?
+%{_sbindir}/new-kernel-pkg --package kernel-ml-aufs --rpmposttrans %{version}-%{release}.%{_target_cpu} || exit $?
 if [ -x %{_sbindir}/weak-modules ]; then
     %{_sbindir}/weak-modules --add-kernel %{version}-%{release}.%{_target_cpu} || exit $?
 fi
 
 %post
-%{_sbindir}/new-kernel-pkg --package kernel-ml --install %{version}-%{release}.%{_target_cpu} || exit $?
+%{_sbindir}/new-kernel-pkg --package kernel-ml-aufs --install %{version}-%{release}.%{_target_cpu} || exit $?
 
 %preun
 %{_sbindir}/new-kernel-pkg --rminitrd --rmmoddep --remove %{version}-%{release}.%{_target_cpu} || exit $?
@@ -649,10 +629,10 @@ fi
 %endif
 
 %if %{with_tools}
-%post -n kernel-ml-tools
+%post -n kernel-ml-aufs-tools
 %{_sbindir}/ldconfig || exit $?
 
-%postun -n kernel-ml-tools
+%postun -n kernel-ml-aufs-tools
 %{_sbindir}/ldconfig || exit $?
 %endif
 
@@ -673,7 +653,7 @@ fi
 /lib/modules/%{version}-%{release}.%{_target_cpu}/weak-updates
 %ifarch %{vdso_arches}
 /lib/modules/%{version}-%{release}.%{_target_cpu}/vdso
-/etc/ld.so.conf.d/kernel-ml-%{version}-%{release}.%{_target_cpu}.conf
+/etc/ld.so.conf.d/kernel-ml-aufs-%{version}-%{release}.%{_target_cpu}.conf
 %endif
 /lib/modules/%{version}-%{release}.%{_target_cpu}/modules.*
 %ghost /boot/initramfs-%{version}-%{release}.%{_target_cpu}.img
@@ -692,9 +672,9 @@ fi
 %if %{with_doc}
 %files doc
 %defattr(-,root,root)
-%{_datadir}/doc/kernel-ml-doc-%{version}/Documentation/*
-%dir %{_datadir}/doc/kernel-ml-doc-%{version}/Documentation
-%dir %{_datadir}/doc/kernel-ml-doc-%{version}
+%{_datadir}/doc/kernel-ml-aufs-doc-%{version}/Documentation/*
+%dir %{_datadir}/doc/kernel-ml-aufs-doc-%{version}/Documentation
+%dir %{_datadir}/doc/kernel-ml-aufs-doc-%{version}
 %{_datadir}/man/man9/*
 %endif
 
@@ -719,7 +699,7 @@ fi
 %endif
 
 %if %{with_tools}
-%files -n kernel-ml-tools -f cpupower.lang
+%files -n kernel-ml-aufs-tools -f cpupower.lang
 %defattr(-,root,root)
 
 %ifarch x86_64
@@ -734,12 +714,12 @@ fi
 %{_bindir}/turbostat
 %{_mandir}/man8/turbostat*
 
-%files -n kernel-ml-tools-libs
+%files -n kernel-ml-aufs-tools-libs
 %defattr(-,root,root)
 %{_libdir}/libcpupower.so.0
 %{_libdir}/libcpupower.so.0.0.0
 
-%files -n kernel-ml-tools-libs-devel
+%files -n kernel-ml-aufs-tools-libs-devel
 %defattr(-,root,root)
 %{_libdir}/libcpupower.so
 %{_includedir}/cpufreq.h
@@ -908,56 +888,56 @@ fi
 
 * Sun Jun 08 2014 Alan Bartlett <ajb@elrepo.org> - 3.15.0-0.rc8
 - Updated with the 3.15 source tarball.
-- The eighth release candidate of a kernel-ml package set for EL7.
+- The eighth release candidate of a kernel-ml-aufs package set for EL7.
 
 * Sun Jun 08 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.6-0.rc7
 - Updated with the 3.14.6 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.6]
-- The seventh release candidate of a kernel-ml package set for EL7.
+- The seventh release candidate of a kernel-ml-aufs package set for EL7.
 
 * Wed Jun 04 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.5-0.rc6
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.5]
-- The sixth release candidate of a kernel-ml package set for EL7.
-- Added a "Conflicts:" line for the kernel-ml-doc package.
+- The sixth release candidate of a kernel-ml-aufs package set for EL7.
+- Added a "Conflicts:" line for the kernel-ml-aufs-doc package.
 
 * Mon Jun 02 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.5-0.rc5
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.5]
-- The fifth release candidate of a kernel-ml package set for EL7.
+- The fifth release candidate of a kernel-ml-aufs package set for EL7.
 - CONFIG_SECURITY_TOMOYO_ACTIVATION_TRIGGER="/usr/lib/systemd/systemd"
-- Corrected the "Conflicts:" line for the kernel-ml-tools-libs-devel
+- Corrected the "Conflicts:" line for the kernel-ml-aufs-tools-libs-devel
 - package. [Akemi Yagi]
 
 * Sun Jun 01 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.5-0.rc4
 - Updated with the 3.14.5 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.5]
-- The fourth release candidate of a kernel-ml package set for EL7.
-- Added a "Conflicts:" line for the kernel-ml-tools,
-- kernel-ml-tools-libs & kernel-ml-tools-devel packages.
+- The fourth release candidate of a kernel-ml-aufs package set for EL7.
+- Added a "Conflicts:" line for the kernel-ml-aufs-tools,
+- kernel-ml-aufs-tools-libs & kernel-ml-aufs-tools-devel packages.
 
 * Wed May 28 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.rc3
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The third release candidate of a kernel-ml package set for EL7.
+- The third release candidate of a kernel-ml-aufs package set for EL7.
 - Fix a problem with the symlink between the /usr/src/$(uname -r)/
 - directory and the /lib/modules/$(uname -r)/build directory.
 
 * Sat May 24 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.rc2
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The second release candidate of a kernel-ml package set for EL7.
+- The second release candidate of a kernel-ml-aufs package set for EL7.
 - Add calls of weak-modules to the %%posttrans & %%preun scripts.
 
 * Tue May 20 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.rc1
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
 - Skip the beta phase.
-- The first release candidate of a kernel-ml package set for EL7.
+- The first release candidate of a kernel-ml-aufs package set for EL7.
 
 * Mon May 19 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.alpha3
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The third attempt to build a kernel-ml package set for EL7.
+- The third attempt to build a kernel-ml-aufs package set for EL7.
 
 * Sun May 18 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.alpha2
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The second attempt to build a kernel-ml package set for EL7.
+- The second attempt to build a kernel-ml-aufs package set for EL7.
 
 * Sat May 17 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.alpha1
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The first attempt to build a kernel-ml package set for EL7.
+- The first attempt to build a kernel-ml-aufs package set for EL7.

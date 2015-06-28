@@ -43,18 +43,23 @@ if [ ! -f kernel-ml-aufs/configs-el$EL_VERSION/config-$FULL_VERSION-$ARCH ]; the
   exit 1
 fi
 
-# Copy everything to a temp directory
-echo "Creating temp directory..."
-mkdir -p temp/logs
-echo "Copying files to temp directory..."
-cp -a kernel-ml-aufs temp/
+# Create a build directory with all the stuff we need
+echo "Creating build directory..."
+mkdir -p build/logs
+mkdir -p build/rpms
+echo "Copying spec file and config file(s) to build directory..."
+cp -a kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec build/
+cp -a kernel-ml-aufs/configs-el$EL_VERSION/config-$FULL_VERSION-* build/
+if [ $EL_VERSION -eq 7 ]; then
+  cp -a kernel-ml-aufs/configs-el7/cpupower* build
+fi
 
 # From hereon out, everything we do will be in the temp directory
-cd temp
+cd build
 
 # Grab the source files for our kernel version
 echo "Grabbing kernel source..."
-spectool -g -C kernel-ml-aufs kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec > logs/spectool.log 2>&1
+spectool -g -C . kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec > logs/spectool.log 2>&1
 
 # Clone the AUFS repo
 if [[ $VERSION =~ ^4 ]]; then
@@ -73,17 +78,18 @@ fi
 echo "Cloning AUFS source into our kernel sources..."
 pushd aufs-standalone
 HEAD_COMMIT=`git rev-parse --short HEAD 2> /dev/null`
-git archive $HEAD_COMMIT > ../kernel-ml-aufs/aufs-standalone.tar
+git archive $HEAD_COMMIT > ../aufs-standalone.tar
 popd
+rm -rf aufs-standalone
 
 # Create our SRPM
 echo "Creating source RPM..."
-mock -r epel-$EL_VERSION-x86_64 --buildsrpm --spec kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec --sources kernel-ml-aufs --resultdir output > logs/srpm_generation.log 2>&1
+mock -r epel-$EL_VERSION-x86_64 --buildsrpm --spec kernel-ml-aufs-$VERSION.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
 
 # If successful, create our binary RPMs
 if [ $? -eq 0 ]; then
   echo "Source RPM created. Building binary RPMs..."
-  mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
+  mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir rpms rpms/kernel-ml-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
 else
   echo "Could not create source RPM! Exiting!"
   exit 1
@@ -92,10 +98,7 @@ fi
 if [ $? -eq 0 ]; then
   mkdir ~/RPMs
   echo "Binary RPMs created successfully! Moving to ~/RPMs..."
-  mv output/*.rpm ~/RPMs
-  echo "Removing temp directory..."
-  cd ..
-  rm -rf temp
+  mv rpms/*.rpm ~/RPMs
 else
   echo "Binary RPM creation failed! See logs for details."
   exit 1
