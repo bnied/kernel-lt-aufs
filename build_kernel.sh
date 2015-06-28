@@ -61,7 +61,7 @@ if [[ $VERSION =~ ^4 ]]; then
   echo "Cloning AUFS 4.x..."
   git clone git://github.com/sfjro/aufs4-standalone.git -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1
   # Stupid workaround until 4.1 is tagged properly
-  if [[ $? -neq 0 ]]; then
+  if [[ $? != 0 ]]; then
     git clone git://github.com/sfjro/aufs4-standalone.git -b aufs4.x-rcN aufs-standalone > logs/aufs-git.log 2>&1
   fi
 else
