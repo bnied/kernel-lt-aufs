@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 3.18.14
+%define LKAver 4.1
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -60,6 +60,7 @@
 %ifarch x86_64
 %define with_nonpae 0
 %define with_doc 0
+%define with_perf 0
 %define with_firmware 0
 %endif
 
@@ -171,11 +172,11 @@ BuildRequires: python
 BuildConflicts: rhbuildsys(DiskFree) < 7Gb
 
 # Sources.
-Source0: ftp://ftp.kernel.org/pub/linux/kernel/v3.x/linux-%{LKAver}.tar.xz
-Source1: config-%{version}-i686
-Source2: config-%{version}-i686-NONPAE
-Source3: config-%{version}-x86_64
-Source4: %{AUFSver}.tar
+Source0: ftp://ftp.kernel.org/pub/linux/kernel/v4.x/linux-%{LKAver}.tar.xz
+Source1: ../configs-el6/config-%{version}-i686
+Source2: ../configs-el6/config-%{version}-i686-NONPAE
+Source3: ../configs-el6/config-%{version}-x86_64
+Source4: ../%{AUFSver}.tar
 
 %description
 This package provides the Linux kernel (vmlinuz), the core of any
@@ -317,9 +318,9 @@ cp -r ../%{AUFSver}/Documentation/filesystems Documentation/
 cp -r ../%{AUFSver}/Documentation/ABI Documentation/
 cp -r ../%{AUFSver}/fs/aufs fs/
 cp ../%{AUFSver}/include/uapi/linux/aufs_type.h include/uapi/linux/
-patch -p 1 < ../%{AUFSver}/aufs3-kbuild.patch
-patch -p 1 < ../%{AUFSver}/aufs3-base.patch
-patch -p 1 < ../%{AUFSver}/aufs3-mmap.patch
+patch -p 1 < ../%{AUFSver}/aufs4-kbuild.patch
+patch -p 1 < ../%{AUFSver}/aufs4-base.patch
+patch -p 1 < ../%{AUFSver}/aufs4-mmap.patch
 %{__cp} %{SOURCE1} .
 %{__cp} %{SOURCE2} .
 %{__cp} %{SOURCE3} .
@@ -775,17 +776,47 @@ fi
 /etc/bash_completion.d/perf
 %{_bindir}/perf
 %{_bindir}/trace
-%{_libdir}/libperf-gtk.so
-%dir %{_libdir}/traceevent/plugins
-%{_libdir}/traceevent/plugins/*
+### BCAT
+#
+# As of linux-3.19, the 'make_install' at the end of the perf sub-system
+# build on a 64-bit system results in the '/usr/lib/' directory and not
+# the correct '/usr/lib64/' directory being used. Don't ask me why.
+# We cannot, therefore, use the normal macro expansion.
+#
+#{_libdir}/libperf-gtk.so
+#dir %{_libdir}/traceevent/plugins
+#{_libdir}/traceevent/plugins/*
+### BCAT
+%{_usr}/lib/libperf-gtk.so
+%dir %{_usr}/lib/traceevent/plugins
+%{_usr}/lib/traceevent/plugins/*
+### BCAT
 %dir %{_libexecdir}/perf-core
 %{_libexecdir}/perf-core/*
 %{_mandir}/man[1-8]/*
 %endif
 
 %changelog
-* Sat Feb 21 2015 Ben Nied <spacewreckage@gmail.com> - aufs-3.18.6-1
-- Added AUFS support for the 3.18 kernel.
+* Mon Apr 13 2015 Ben Nied <spacewreckage@gmail.com> - aufs-4.0.0-1
+- Added AUFS support for the 4.0 kernel.
+
+* Mon Apr 13 2015 Alan Bartlett <ajb@elrepo.org> - 4.0.0-1
+- Updated with the 4.0 source tarball.
+
+* Thu Mar 26 2015 Alan Bartlett <ajb@elrepo.org> - 3.19.3-1
+- Updated with the 3.19.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.19.3]
+
+* Wed Mar 18 2015 Alan Bartlett <ajb@elrepo.org> - 3.19.2-1
+- Updated with the 3.19.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.19.2]
+
+* Sat Mar 07 2015 Alan Bartlett <ajb@elrepo.org> - 3.19.1-1
+- Updated with the 3.19.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.19.1]
+
+* Mon Feb 09 2015 Alan Bartlett <ajb@elrepo.org> - 3.19.0-1
+- Updated with the 3.19 source tarball.
 
 * Fri Feb 06 2015 Alan Bartlett <ajb@elrepo.org> - 3.18.6-1
 - Updated with the 3.18.6 source tarball.

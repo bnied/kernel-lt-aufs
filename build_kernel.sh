@@ -23,13 +23,13 @@ else
 fi
 
 # If our spec file is missing, exit
-if [ ! -f kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec ]; then
+if [ ! -f kernel-ml-aufs/specs-el$EL_VERSION/$kernel-ml-aufs-$VERSION.spec ]; then
   echo "Spec file not found for version $VERSION"
   exit 1
 fi
 
 # Get minor config version from spec file
-FULL_VERSION=`cat kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec | grep "%define LKAver" | awk '{print $3}'`
+FULL_VERSION=`cat kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec | grep "%define LKAver" | awk '{print $3}'`
 
 # If we only have two parts to our version number, append ".0" to the end
 VERSION_ARRAY=(`echo $FULL_VERSION | tr "." "\n"`)
@@ -38,16 +38,14 @@ if [ ${#VERSION_ARRAY[@]} -le 2 ]; then
 fi
 
 # If our kernel config is missing, exit
-if [ ! -f kernel-ml-aufs/config-$FULL_VERSION-$ARCH ]; then
+if [ ! -f kernel-ml-aufs/configs-el$EL_VERSION/config-$FULL_VERSION-$ARCH ]; then
   echo "Config file not found for $FULL_VERSION-$ARCH"
   exit 1
 fi
 
 # Copy everything to a temp directory
 echo "Creating temp directory..."
-mkdir temp
-echo "Creating log directory..."
-mkdir temp/logs
+mkdir -p temp/logs
 echo "Copying files to temp directory..."
 cp -a kernel-ml-aufs temp/
 
@@ -56,7 +54,7 @@ cd temp
 
 # Grab the source files for our kernel version
 echo "Grabbing kernel source..."
-spectool -g -C kernel-ml-aufs kernel-ml-aufs/kernel-ml-aufs-$VERSION.spec > logs/spectool.log 2>&1
+spectool -g -C kernel-ml-aufs kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec > logs/spectool.log 2>&1
 
 # Clone the AUFS repo
 if [[ $VERSION =~ ^4 ]]; then

@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 3.19.8
+%define LKAver 3.18.14
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -61,7 +61,6 @@
 %define with_nonpae 0
 %define with_doc 0
 %define with_firmware 0
-%define with_perf 0
 %endif
 
 # Define the asmarch.
@@ -173,10 +172,10 @@ BuildConflicts: rhbuildsys(DiskFree) < 7Gb
 
 # Sources.
 Source0: ftp://ftp.kernel.org/pub/linux/kernel/v3.x/linux-%{LKAver}.tar.xz
-Source1: config-%{version}-i686
-Source2: config-%{version}-i686-NONPAE
-Source3: config-%{version}-x86_64
-Source4: %{AUFSver}.tar
+Source1: ../configs-el6/config-%{version}-i686
+Source2: ../configs-el6/config-%{version}-i686-NONPAE
+Source3: ../configs-el6/config-%{version}-x86_64
+Source4: ../%{AUFSver}.tar
 
 %description
 This package provides the Linux kernel (vmlinuz), the core of any
@@ -776,31 +775,17 @@ fi
 /etc/bash_completion.d/perf
 %{_bindir}/perf
 %{_bindir}/trace
-### BCAT
-#
-# As of linux-3.19, the 'make_install' at the end of the perf sub-system build
-# on a 64-bit system results in the '%{_libdir}' macro being expanded as
-# '/usr/lib/' and not the correct, expected '/usr/lib64/'. Don't ask me why.
-#
-#{_libdir}/libperf-gtk.so
-#dir %{_libdir}/traceevent/plugins
-#{_libdir}/traceevent/plugins/*
-### BCAT
-%{_usr}/lib/libperf-gtk.so
-%dir %{_usr}/lib/traceevent/plugins
-%{_usr}/lib/traceevent/plugins/*
-### BCAT
+%{_libdir}/libperf-gtk.so
+%dir %{_libdir}/traceevent/plugins
+%{_libdir}/traceevent/plugins/*
 %dir %{_libexecdir}/perf-core
 %{_libexecdir}/perf-core/*
 %{_mandir}/man[1-8]/*
 %endif
 
 %changelog
-* Sat Feb 21 2015 Ben Nied <spacewreckage@gmail.com> - aufs-3.19.0-1
-- Added AUFS support for the 3.19 kernel.
-
-* Mon Feb 09 2015 Alan Bartlett <ajb@elrepo.org> - 3.19.0-1
-- Updated with the 3.19 source tarball.
+* Sat Feb 21 2015 Ben Nied <spacewreckage@gmail.com> - aufs-3.18.6-1
+- Added AUFS support for the 3.18 kernel.
 
 * Fri Feb 06 2015 Alan Bartlett <ajb@elrepo.org> - 3.18.6-1
 - Updated with the 3.18.6 source tarball.
