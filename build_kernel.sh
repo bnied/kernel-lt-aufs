@@ -43,6 +43,12 @@ if [ ! -f kernel-ml-aufs/configs-el$EL_VERSION/config-$FULL_VERSION-$ARCH ]; the
   exit 1
 fi
 
+# See if we already have a build directory
+if [ -d "build" ]; then
+  echo "Build director found! Removing..."
+  rm -rf ./build
+fi
+
 # Create a build directory with all the stuff we need
 echo "Creating build directory..."
 mkdir -p build/logs
