@@ -1,7 +1,7 @@
 RHEL-AUFS-Kernel: `kernel-ml` with AUFS Support
 =============================================================================
 
-This repository contains the specfile and config files to build [kernel-ml](http://elrepo.org/tiki/kernel-ml) kernels that include AUFS for use with Docker. The Docker spec files that were part of the original repo are no longer included. Use Docker from [EPEL](https://admin.fedoraproject.org/pkgdb/acls/name/docker-io) instead.
+This repository contains the specfile and config files to build [kernel-ml](http://elrepo.org/tiki/kernel-ml) kernels that include AUFS for use with Docker. The Docker spec files that were part of the original repo are no longer included.
 
 ***
 
@@ -14,7 +14,7 @@ Please keep in mind that new packages are built as my spare time allows, and tha
 ***
 ### Prerequisites
 
-Before building the packages, be sure to install [fedora-packager](https://dl.fedoraproject.org/pub/epel/6/x86_64/repoview/fedora-packager.html) and add yourself to the _mock_ group.
+Before building the packages, be sure to install [fedora-packager](https://dl.fedoraproject.org/pub/epel/6/x86_64/repoview/fedora-packager.html) and add yourself to the *mock* group.
 
 Be aware that building the kernel can take a long time (at least half an hour, up to several hours if you're building on an older machine).
 
@@ -35,10 +35,10 @@ Run the `build_kernel.sh` script, and answer all three questions:
     7
 
 This will build your packages automatically. Logs for the build can be found in two places:
-* `$(REPO_LOCATION)/temp/logs` has the output from each command in separate log files.
-* `$(REPO_LOCATION)/temp/output` contains the `mock` logs so you can see where the build went wrong (if it went wrong at all).
+* `$(REPO_LOCATION)/build/logs` has the output from each command in separate log files.
+* `$(REPO_LOCATION)/build/output` contains the `mock` logs so you can see where the build went wrong (if it went wrong at all).
 
-If all goes well, your new RPMs will be moved to `~/RPMs` and the `temp` directory will be deleted. If there's an issue in building the packages, the `temp` directory will remain behind for analysis.
+If all goes well, your new RPMs will be moved to `~/RPMs`. The `build` directory will remain behind for analysis.
 
 ***
 ### Building Packages Manually
@@ -66,11 +66,15 @@ Once your packages are built, you can install them with `yum`. `cd` to the appro
 
     yum localinstall --nogpgcheck kernel-ml-aufs-3.19.0-1.el6.x86_64.rpm
 
-In order to use docker, you'll need to install it out of EPEL:
+In order to use docker on EL6, you'll need to install it out of EPEL:
 
     yum install docker-io
 
-Reboot and choose the 3.xx kernel from your GRUB menu (or edit `/boot/grub/grub.conf` and change your default kernel).
+For EL7, Docker packages are in the main repos:
+
+    yum install docker
+
+Reboot and choose the AUFS kernel from your GRUB menu (or edit GRUB to change your default kernel).
 
 If everything is working as expected, you should see that AUFS is your storage driver when you run `docker info`:
 
