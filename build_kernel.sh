@@ -45,7 +45,7 @@ fi
 
 # See if we already have a build directory
 if [ -d "build" ]; then
-  echo "Build director found! Removing..."
+  echo "Build directory found! Removing..."
   rm -rf ./build
 fi
 
