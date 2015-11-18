@@ -81,7 +81,7 @@ else
 fi
 
 # Get the HEAD commit from the aufs tree
-echo "Cloning AUFS source into our kernel sources..."
+echo "Creating AUFS source tarball for packaging..."
 pushd aufs-standalone
 HEAD_COMMIT=`git rev-parse --short HEAD 2> /dev/null`
 git archive $HEAD_COMMIT > ../aufs-standalone.tar
