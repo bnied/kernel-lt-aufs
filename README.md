@@ -94,3 +94,12 @@ If everything is working as expected, you should see that AUFS is your storage d
     Name: buildbox.local
     ID: BZQL:SPMI:Y23R:KBPK:SHR2:UTIN:Q2SS:N6SE:3DL2:PNKK:YP5D:OANX
     WARNING: No swap limit support
+
+If you're still seeing `devicemapper` as your storage backend, you'll need to change Docker's configuration to use AUFS. Open `/etc/sysconfig/docker`, and change line 4 from:
+
+    OPTIONS='--selinux-enabled'
+to:
+
+    OPTIONS='--selinux-enabled --storage-driver=aufs'
+
+Restart the Docker service, and it should switch to the correct backend.
