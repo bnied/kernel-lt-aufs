@@ -1,10 +1,9 @@
 RHEL-AUFS-Kernel: `kernel-ml` with AUFS Support
 =============================================================================
 
-This repository contains the specfile and config files to build [kernel-ml](http://elrepo.org/tiki/kernel-ml) kernels that include AUFS for use with Docker. The Docker spec files that were part of the original repo are no longer included.
+This repository contains the specfile and config files to build [kernel-ml](http://elrepo.org/tiki/kernel-ml) kernels that include AUFS for use with Docker. The Docker spec files that were part of the [original repo](https://github.com/sciurus/docker-rhel-rpm.git) are no longer included.
 
 ***
-
 ### Downloading Prebuilt Packages
 
 The simplest method for using these packages is to download them directly from https://yum.spaceduck.org/. Install the [.repo](https://yum.spaceduck.org/rhel-aufs-kernel/rhel-aufs-kernel.repo) file into `/etc/yum.repos.d` to get updates automatically.
@@ -21,7 +20,6 @@ Be aware that building the kernel can take a long time (at least half an hour, u
 To build the packages, there are two options.
 
 ***
-
 ### Using the Build Script
 
 Run the `build_kernel.sh` script, and answer all three questions:
