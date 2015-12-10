@@ -3,17 +3,46 @@
 # rhel-aufs-kernel builder
 # This script automates building out the latest kernel-ml package with AUFS support
 
-# Get the kernel version to build
-echo "What kernel version do you want to build? (major version only)"
-read VERSION
+# Start by seeing how many command line arguments we were passed
+for i in "$@"
+do
+case $i in
+    -v=*|--version=*)
+    VERSION="${i#*=}"
+    ;;
+    -a=*|--arch=*)
+    ARCH="${i#*=}"
+    ;;
+    -e=*|--elversion=*)
+    EL_VERSION="${i#*=}"
+    ;;
+    --default)
+    DEFAULT=YES
+    ;;
+    *)
+            # unknown option
+    ;;
+esac
+done
 
-# Get the architecture to build
-echo "What architecture do you want to build for? (i686, i686-NONPAE, x86_64)"
-read ARCH
 
-# Get version of CentOS/RHEL to build for
-echo "What version of CentOS/RHEL do you want to build for? (6 or 7)"
-read EL_VERSION
+if [ -z "$VERSION" ]; then
+  # Get the kernel version to build
+  echo "What kernel version do you want to build? (major version only)"
+  read VERSION
+fi
+
+if [ -z "$ARCH" ]; then
+  # Get the architecture to build
+  echo "What architecture do you want to build for? (i686, i686-NONPAE, x86_64)"
+  read ARCH
+fi
+
+if [ -z "$EL_VERSION" ]; then
+  # Get version of CentOS/RHEL to build for
+  echo "What version of CentOS/RHEL do you want to build for? (6 or 7)"
+  read EL_VERSION
+fi
 
 # Thanks CentOS 7, you're a shining example of "worse is better"
 if [ $EL_VERSION -eq 7 ]; then
