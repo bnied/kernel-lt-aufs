@@ -16,11 +16,9 @@ case $i in
     -e=*|--elversion=*)
     EL_VERSION="${i#*=}"
     ;;
-    --default)
-    DEFAULT=YES
-    ;;
-    *)
-            # unknown option
+    -h|--help)
+    echo "usage: -v <kernel_version> -a <architecture> -e <el_version>"
+    exit 1
     ;;
 esac
 done
