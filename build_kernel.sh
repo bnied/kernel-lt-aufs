@@ -133,6 +133,9 @@ fi
 if [ -z "$SRPM_ONLY" ]; then
   echo "Building binary RPMs..."
   mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir rpms rpms/kernel-ml-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
+else
+  echo "Exiting..."
+  exit 0
 fi
 
 # If we built the RPMs successfully, report that
@@ -140,6 +143,8 @@ if [ $? -eq 0 ]; then
   mkdir ~/RPMs 2>&1
   echo "RPMs created successfully! Moving to ~/RPMs..."
   mv rpms/*.rpm ~/RPMs
+  echo "Exiting..."
+  exit 0
 else
   echo "Binary RPM creation failed! See logs for details."
   exit 1
