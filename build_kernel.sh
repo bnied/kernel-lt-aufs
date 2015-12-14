@@ -16,8 +16,11 @@ case $i in
     -e=*|--elversion=*)
     EL_VERSION="${i#*=}"
     ;;
+    -s|--srpm-only)
+    SRPM_ONLY=true
+    ;;
     -h|--help)
-    echo "usage: -v <kernel_version> -a <architecture> -e <el_version>"
+    echo "usage: -v=<kernel_version> -a=<architecture> -e=<el_version>"
     exit 1
     ;;
 esac
@@ -109,28 +112,30 @@ fi
 
 # Get the HEAD commit from the aufs tree
 echo "Creating AUFS source tarball for packaging..."
-pushd aufs-standalone
+pushd aufs-standalone 2>&1
 HEAD_COMMIT=`git rev-parse --short HEAD 2> /dev/null`
 git archive $HEAD_COMMIT > ../aufs-standalone.tar
-popd
+popd 2>&1
 rm -rf aufs-standalone
 
 # Create our SRPM
 echo "Creating source RPM..."
 mock -r epel-$EL_VERSION-x86_64 --buildsrpm --spec kernel-ml-aufs-$VERSION.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
 
-# If successful, create our binary RPMs
-if [ $? -eq 0 ]; then
-  echo "Source RPM created. Building binary RPMs..."
-  mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir rpms rpms/kernel-ml-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
-else
-  echo "Could not create source RPM! Exiting!"
-  exit 1
+# Only build our binary RPMs if we didn't specify SRPM_ONLY and the SRPM build correctly
+if [ -z "$SRPM_ONLY" ]; then
+  if [ $? -eq 0 ]; then
+    echo "Source RPM created. Building binary RPMs..."
+    mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir rpms rpms/kernel-ml-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
+  else
+    echo "Could not create source RPM! Exiting!"
+    exit 1
+  fi
 fi
 
 if [ $? -eq 0 ]; then
   mkdir ~/RPMs
-  echo "Binary RPMs created successfully! Moving to ~/RPMs..."
+  echo "RPMs created successfully! Moving to ~/RPMs..."
   mv rpms/*.rpm ~/RPMs
 else
   echo "Binary RPM creation failed! See logs for details."
