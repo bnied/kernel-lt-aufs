@@ -4,9 +4,8 @@
 # This script automates building out the latest kernel-ml package with AUFS support
 
 # Start by seeing how many command line arguments we were passed
-for i in "$@"
-do
-case $i in
+for i in "$@"; do
+  case $i in
     -v=*|--version=*)
     VERSION="${i#*=}"
     ;;
@@ -23,29 +22,29 @@ case $i in
     echo "usage: -v=<kernel_version> -a=<architecture> -e=<el_version>"
     exit 1
     ;;
-esac
+  esac
 done
 
-
+# If we weren't passed these variables as commandline options, ask for them
 if [ -z "$VERSION" ]; then
   # Get the kernel version to build
-  echo "What kernel version do you want to build? (major version only)"
+  echo "Kernel version not specified. What kernel version do you want to build? (major version only)"
   read VERSION
 fi
 
 if [ -z "$ARCH" ]; then
   # Get the architecture to build
-  echo "What architecture do you want to build for? (i686, i686-NONPAE, x86_64)"
+  echo "Architecture not specified. What architecture do you want to build for? (i686, i686-NONPAE, x86_64)"
   read ARCH
 fi
 
 if [ -z "$EL_VERSION" ]; then
   # Get version of CentOS/RHEL to build for
-  echo "What version of CentOS/RHEL do you want to build for? (6 or 7)"
+  echo "EL Version not specified. What version of CentOS/RHEL do you want to build for? (6 or 7)"
   read EL_VERSION
 fi
 
-# Thanks CentOS 7, you're a shining example of "worse is better"
+# Set the EL version tag for the RPMs
 if [ $EL_VERSION -eq 7 ]; then
   RPM_EL_VERSION="el7.centos"
 else
@@ -73,7 +72,7 @@ if [ ! -f kernel-ml-aufs/configs-el$EL_VERSION/config-$FULL_VERSION-$ARCH ]; the
   exit 1
 fi
 
-# See if we already have a build directory
+# See if we already have a build directory; if we do, nuke it
 if [ -d "build" ]; then
   echo "Build directory found! Removing..."
   rm -rf ./build
@@ -112,29 +111,33 @@ fi
 
 # Get the HEAD commit from the aufs tree
 echo "Creating AUFS source tarball for packaging..."
-pushd aufs-standalone 2>&1
+pushd aufs-standalone 2>&1 > /dev/null
 HEAD_COMMIT=`git rev-parse --short HEAD 2> /dev/null`
 git archive $HEAD_COMMIT > ../aufs-standalone.tar
-popd 2>&1
+popd 2>&1 > /dev/null
 rm -rf aufs-standalone
 
 # Create our SRPM
 echo "Creating source RPM..."
 mock -r epel-$EL_VERSION-x86_64 --buildsrpm --spec kernel-ml-aufs-$VERSION.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
 
-# Only build our binary RPMs if we didn't specify SRPM_ONLY and the SRPM build correctly
-if [ -z "$SRPM_ONLY" ]; then
-  if [ $? -eq 0 ]; then
-    echo "Source RPM created. Building binary RPMs..."
-    mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir rpms rpms/kernel-ml-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
-  else
-    echo "Could not create source RPM! Exiting!"
-    exit 1
-  fi
+# If we built the SRPM successfully, report that
+if [ $? -eq 0 ]; then
+  echo "Source RPM created."
+else
+  echo "Could not create source RPM! Exiting!"
+  exit 1
 fi
 
+# Only build our binary RPMs if we didn't specify SRPM_ONLY
+if [ -z "$SRPM_ONLY" ]; then
+  echo "Building binary RPMs..."
+  mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir rpms rpms/kernel-ml-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
+fi
+
+# If we built the RPMs successfully, report that
 if [ $? -eq 0 ]; then
-  mkdir ~/RPMs
+  mkdir ~/RPMs 2>&1
   echo "RPMs created successfully! Moving to ~/RPMs..."
   mv rpms/*.rpm ~/RPMs
 else
