@@ -3,6 +3,14 @@ RHEL-AUFS-Kernel: `kernel-ml` with AUFS Support
 
 This repository contains the specfile and config files to build [kernel-ml](http://elrepo.org/tiki/kernel-ml) kernels that include AUFS for use with Docker. The Docker spec files that were part of the [original repo](https://github.com/sciurus/docker-rhel-rpm.git) are no longer included.
 
+This has been tested on the following distributions:
+* CentOS 6
+* CentOS 7
+* Red Hat Enterprise Linux 6
+* Red Hat Enterprise Linux 7
+
+Other RHEL-derivatives should also work, but have not been tested.
+
 ***
 ### Downloading Prebuilt Packages
 
