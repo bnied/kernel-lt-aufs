@@ -16,7 +16,7 @@ Other RHEL-derivatives should also work, but have not been tested.
 
 There are two methods for getting prebuilt packages:
 
-The first is to download them directly from https://yum.spaceduck.org/. Install the [.repo](https://yum.spaceduck.org/rhel-aufs-kernel/rhel-aufs-kernel.repo) file into `/etc/yum.repos.d` to get updates automatically.
+The first is to download them directly from [the Spaceduck.org Yum repo](https://yum.spaceduck.org/). Install the [.repo](https://yum.spaceduck.org/rhel-aufs-kernel/rhel-aufs-kernel.repo) file into `/etc/yum.repos.d` to get updates automatically.
 
 The second is to install them from Fedora Copr: `sudo dnf copr enable bnied/rhel-aufs-kernel`. The Copr repo is still being backfilled with old kernels, but all recent builds should be present, and identical to the `yum.shutterstock.org` packages.
 
