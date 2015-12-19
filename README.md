@@ -14,7 +14,11 @@ Other RHEL-derivatives should also work, but have not been tested.
 ***
 ### Downloading Prebuilt Packages
 
-The simplest method for using these packages is to download them directly from https://yum.spaceduck.org/. Install the [.repo](https://yum.spaceduck.org/rhel-aufs-kernel/rhel-aufs-kernel.repo) file into `/etc/yum.repos.d` to get updates automatically.
+There are two methods for getting prebuilt packages:
+
+The first is to download them directly from https://yum.spaceduck.org/. Install the [.repo](https://yum.spaceduck.org/rhel-aufs-kernel/rhel-aufs-kernel.repo) file into `/etc/yum.repos.d` to get updates automatically.
+
+The second is to install them from Fedora Copr: `sudo dnf copr enable bnied/rhel-aufs-kernel`. The Copr repo is still being backfilled with old kernels, but all recent builds should be present, and identical to the `yum.shutterstock.org` packages.
 
 Please keep in mind that new packages are built as my spare time allows, and that updates to this repo will often appear before the packages are built. If you can't wait, you can build these yourself using one of the methods below.
 
@@ -24,8 +28,6 @@ Please keep in mind that new packages are built as my spare time allows, and tha
 Before building the packages, be sure to install [fedora-packager](https://dl.fedoraproject.org/pub/epel/6/x86_64/repoview/fedora-packager.html) and add yourself to the *mock* group.
 
 Be aware that building the kernel can take a long time (at least half an hour, up to several hours if you're building on an older machine).
-
-To build the packages, there are two options.
 
 ***
 ### Using the Build Script
@@ -51,7 +53,7 @@ If all goes well, your new RPMs will be moved to `~/RPMs`. The `build` directory
 
 If you'd rather run through the steps manually, you can do so with the instructions below. Be sure to change `epel-6-x86_64` to `epel-7-x86_64` and the filename for the source RPM if you're building for EL7.
 
-Linux 4.x will use the newer AUFS 4 tree in its packages. Linux 3.x will use AUFS 3.x.
+Linux 4.x will use the AUFS 4.x tree in its packages. Linux 3.x will use AUFS 3.x.
 
 In the example below, we're building `kernel-ml` 3.19.0 with the latest commit out of the AUFS tree (`f60288dc0e0aab77ca545f42d785ec280f4700b9`) at the time of writing. When you build your kernel versions, be sure to update this step to the latest commit.
 
