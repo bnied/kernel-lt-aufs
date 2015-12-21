@@ -21,7 +21,7 @@ The second is to install the packages from Fedora Copr:
 * [.repo file for EL6](https://copr.fedoraproject.org/coprs/bnied/rhel-aufs-kernel/repo/epel-6/bnied-rhel-aufs-kernel-epel-6.repo)
 * [.repo file for EL7](https://copr.fedoraproject.org/coprs/bnied/rhel-aufs-kernel/repo/epel-7/bnied-rhel-aufs-kernel-epel-7.repo)
 
-The Copr repo is still being backfilled with old kernels, but all recent builds should be present, and identical to the `yum.shutterstock.org` packages.
+The Copr repo is still being backfilled with old kernels, but all recent builds should be present, and identical to the `yum.spaceduck.org` packages.
 
 Please keep in mind that new packages are built as time allows, and that updates to this repo will often appear before the packages are built.
 
