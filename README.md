@@ -47,6 +47,7 @@ Run the `build_kernel.sh` script, and either answer all three questions, or prov
     7
 
 or
+
     $ ./build_kernel.sh -v=3.19 -a=x86_64 -e=7
 
 This will build your packages automatically. Logs for the build can be found in two places:
