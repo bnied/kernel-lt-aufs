@@ -36,7 +36,7 @@ Be aware that building the kernel can take a long time (at least half an hour, u
 ***
 ### Using the Build Script
 
-Run the `build_kernel.sh` script, and answer all three questions:
+Run the `build_kernel.sh` script, and either answer all three questions, or provide them as command-line parameters:
 
     $ ./build_kernel.sh
     What kernel version do you want to build? (major version only)
@@ -45,6 +45,9 @@ Run the `build_kernel.sh` script, and answer all three questions:
     x86_64
     What version of CentOS/RHEL do you want to build for? (6 or 7)
     7
+
+or
+    $ ./build_kernel.sh -v=3.19 -a=x86_64 -e=7
 
 This will build your packages automatically. Logs for the build can be found in two places:
 * `$(REPO_LOCATION)/build/logs` has the output from each command in separate log files.
