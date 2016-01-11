@@ -52,13 +52,13 @@ else
 fi
 
 # If our spec file is missing, exit
-if [ ! -f kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec ]; then
+if [ ! -f ../specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec ]; then
   echo "Spec file not found for version $VERSION"
   exit 1
 fi
 
 # Get minor config version from spec file
-FULL_VERSION=`cat kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec | grep "%define LKAver" | awk '{print $3}'`
+FULL_VERSION=`cat ../specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec | grep "%define LKAver" | awk '{print $3}'`
 
 # If we only have two parts to our version number, append ".0" to the end
 VERSION_ARRAY=(`echo $FULL_VERSION | tr "." "\n"`)
@@ -67,7 +67,7 @@ if [ ${#VERSION_ARRAY[@]} -le 2 ]; then
 fi
 
 # If our kernel config is missing, exit
-if [ ! -f kernel-ml-aufs/configs-el$EL_VERSION/config-$FULL_VERSION-$ARCH ]; then
+if [ ! -f ../configs-el$EL_VERSION/config-$FULL_VERSION-$ARCH ]; then
   echo "Config file not found for $FULL_VERSION-$ARCH"
   exit 1
 fi
@@ -83,10 +83,10 @@ echo "Creating build directory..."
 mkdir -p build/logs
 mkdir -p build/rpms
 echo "Copying spec file and config file(s) to build directory..."
-cp -a kernel-ml-aufs/specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec build/
-cp -a kernel-ml-aufs/configs-el$EL_VERSION/config-$FULL_VERSION-* build/
+cp -a ../specs-el$EL_VERSION/kernel-ml-aufs-$VERSION.spec build/
+cp -a ../configs-el$EL_VERSION/config-$FULL_VERSION-* build/
 if [ $EL_VERSION -eq 7 ]; then
-  cp -a kernel-ml-aufs/configs-el7/cpupower* build
+  cp -a ../configs-el7/cpupower* build
 fi
 
 # From hereon out, everything we do will be in the temp directory
