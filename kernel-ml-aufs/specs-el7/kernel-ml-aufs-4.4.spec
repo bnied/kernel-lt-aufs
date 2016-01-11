@@ -107,13 +107,13 @@ ExclusiveOS: Linux
 Provides: kernel = %{version}-%{release}
 Provides: kernel-%{_target_cpu} = %{version}-%{release}
 Provides: kernel-uname-r = %{version}-%{release}.%{_target_cpu}
-Provides: kernel-drm = 4.4.0
+Provides: kernel-drm = 4.3.0
 Provides: kernel-drm-nouveau = 16
 Provides: kernel-modeset = 1
 Provides: %{name} = %{version}-%{release}
 Provides: %{name}-%{_target_cpu} = %{version}-%{release}
 Provides: %{name}-uname-r = %{version}-%{release}.%{_target_cpu}
-Provides: %{name}-drm = 4.4.0
+Provides: %{name}-drm = 4.3.0
 Provides: %{name}-drm-nouveau = 16
 Provides: %{name}-modeset = 1
 Requires(pre): %{kernel_prereq}
