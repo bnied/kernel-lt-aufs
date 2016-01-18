@@ -99,11 +99,8 @@ spectool -g -C . kernel-lt-aufs-$VERSION.spec > logs/spectool.log 2>&1
 # Clone the AUFS repo
 if [[ $VERSION =~ ^4 ]]; then
   echo "Cloning AUFS 4.x..."
-  git clone git://github.com/sfjro/aufs4-standalone.git -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1
-  # Stupid workaround until 4.1 is tagged properly
-  if [[ $? != 0 ]]; then
-    git clone git://github.com/sfjro/aufs4-standalone.git -b aufs4.x-rcN aufs-standalone > logs/aufs-git.log 2>&1
-  fi
+  # 4.1 kernels > 4.1.13 have their own branch; take this out once kernel-lt moves on.
+  git clone git://github.com/sfjro/aufs4-standalone.git -b aufs4.1.13+ aufs-standalone > logs/aufs-git.log 2>&1
 else
   echo "Cloning AUFS 3.x..."
   git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1

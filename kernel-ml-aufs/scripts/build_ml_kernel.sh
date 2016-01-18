@@ -100,7 +100,7 @@ spectool -g -C . kernel-ml-aufs-$VERSION.spec > logs/spectool.log 2>&1
 if [[ $VERSION =~ ^4 ]]; then
   echo "Cloning AUFS 4.x..."
   git clone git://github.com/sfjro/aufs4-standalone.git -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1
-  # Stupid workaround until 4.1 is tagged properly
+  # Workaround, in the event that the aufs$VERSION branch doesn't exist yet
   if [[ $? != 0 ]]; then
     git clone git://github.com/sfjro/aufs4-standalone.git -b aufs4.x-rcN aufs-standalone > logs/aufs-git.log 2>&1
   fi
