@@ -23,7 +23,7 @@ The second is to install the packages from Fedora Copr:
 
 The Copr repo will only ever contain the most recently-built packages, where the spaceduck.org one should include historical RPMs as well. Please keep in mind that new packages are built as time allows, and that updates to this repo will often appear before the packages are built.
 
-*If you want these packages to be your default kernel in GRUB*: edit `/etc/sysconfig/kernel`, and change `DEFAULTKERNEL` to `DEFAULTKERNEL=kernel-lt-aufs`.
+**If you want these packages to be your default kernel in GRUB:** edit `/etc/sysconfig/kernel`, and change `DEFAULTKERNEL` to `DEFAULTKERNEL=kernel-lt-aufs`.
 
 ***
 ## Building Packages
