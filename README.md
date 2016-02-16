@@ -1,6 +1,6 @@
-# RHEL-AUFS-Kernel: `kernel-ml` with AUFS Support
+# kernel-lt-aufs: `kernel-lt` with AUFS Support
 
-This repository contains the specfile and config files to build [kernel-ml](http://elrepo.org/tiki/kernel-ml) kernels that include AUFS for use with Docker. The Docker spec files that were part of the [original repo](https://github.com/sciurus/docker-rhel-rpm.git) are no longer included.
+This repository contains the specfile and config files to build [kernel-lt](http://elrepo.org/tiki/kernel-lt) kernels that include AUFS for use with Docker. The Docker spec files that were part of the [original repo](https://github.com/sciurus/docker-rhel-rpm.git) are no longer included.
 
 This has been tested on the following distributions:
 * CentOS 6
@@ -15,21 +15,19 @@ Other RHEL-derivatives should also work, but have not been tested.
 
 There are two methods for getting prebuilt packages:
 
-The first is to download them directly from [the Spaceduck.org Yum repo](https://yum.spaceduck.org/). Install the [.repo](https://yum.spaceduck.org/rhel-aufs-kernel/rhel-aufs-kernel.repo) file into `/etc/yum.repos.d` to get updates automatically.
+The first is to download them directly from [the Spaceduck.org Yum repo](https://yum.spaceduck.org/). Install the [.repo](https://yum.spaceduck.org/kernel-lt-aufs/kernel-lt-aufs.repo) file into `/etc/yum.repos.d` to get updates automatically.
 
 The second is to install the packages from Fedora Copr:
-* [.repo file for EL6](https://copr.fedoraproject.org/coprs/bnied/rhel-aufs-kernel/repo/epel-6/bnied-rhel-aufs-kernel-epel-6.repo)
-* [.repo file for EL7](https://copr.fedoraproject.org/coprs/bnied/rhel-aufs-kernel/repo/epel-7/bnied-rhel-aufs-kernel-epel-7.repo)
+* [.repo file for EL6](https://copr.fedorainfracloud.org/coprs/bnied/kernel-lt-aufs/repo/epel-6/bnied-kernel-lt-aufs-epel-6.repo)
+* [.repo file for EL7](https://copr.fedorainfracloud.org/coprs/bnied/kernel-lt-aufs/repo/epel-7/bnied-kernel-lt-aufs-epel-7.repo)
 
-The Copr repo is still being backfilled with old kernels, but all recent builds should be present, and identical to the `yum.spaceduck.org` packages.
-
-Please keep in mind that new packages are built as time allows, and that updates to this repo will often appear before the packages are built.
+The Copr repo will only ever contain the most recently-built packages, where the spaceduck.org one should include historical RPMs as well. Please keep in mind that new packages are built as time allows, and that updates to this repo will often appear before the packages are built.
 
 ***
 ## Building Packages
 ### Prerequisites
 
-Before building the packages, be sure to install [fedora-packager](https://dl.fedoraproject.org/pub/epel/6/x86_64/repoview/fedora-packager.html) and add yourself to the *mock* group.
+Before building the packages, be sure to install the `fedora-packager` package, and add yourself to the `mock` group. If you're on Fedora, `fedora-packager` will be available from the base repos. EL users will need to install from EPEL.
 
 Be aware that building the kernel can take a long time (at least half an hour, up to several hours if you're building on an older machine).
 
@@ -63,15 +61,15 @@ If you'd rather run through the steps manually, you can do so with the instructi
 
 Linux 4.x will use the AUFS 4.x tree in its packages. Linux 3.x will use AUFS 3.x.
 
-In the example below, we're building `kernel-ml` 3.19.0 with the latest commit out of the AUFS tree (`f60288dc0e0aab77ca545f42d785ec280f4700b9`) at the time of writing. When you build your kernel versions, be sure to update this step to the latest commit.
+In the example below, we're building `kernel-lt` 3.19.0 with the latest commit out of the AUFS tree (`f60288dc0e0aab77ca545f42d785ec280f4700b9`) at the time of writing. When you build your kernel versions, be sure to update this step to the latest commit.
 
-    spectool -g -C kernel-ml-aufs kernel-ml-aufs/kernel-ml-aufs-3.19.spec
+    spectool -g -C kernel-lt-aufs kernel-lt-aufs/kernel-lt-aufs-3.19.spec
     git clone git://git.code.sf.net/p/aufs/aufs3-standalone -b aufs3.19
     pushd aufs3-standalone
-    git archive f60288dc0e0aab77ca545f42d785ec280f4700b9 > ../kernel-ml-aufs/aufs3-standalone.tar
+    git archive f60288dc0e0aab77ca545f42d785ec280f4700b9 > ../kernel-lt-aufs/aufs3-standalone.tar
     popd
-    mock -r epel-6-x86_64 --buildsrpm --spec kernel-ml-aufs/kernel-ml-aufs-3.19.spec --sources kernel-ml-aufs --resultdir output
-    mock -r epel-6-x86_64 --rebuild --resultdir output output/kernel-ml-aufs-3.19.0-1.el6.src.rpm
+    mock -r epel-6-x86_64 --buildsrpm --spec kernel-lt-aufs/kernel-lt-aufs-3.19.spec --sources kernel-lt-aufs --resultdir output
+    mock -r epel-6-x86_64 --rebuild --resultdir output output/kernel-lt-aufs-3.19.0-1.el6.src.rpm
 
 The resulting RPMs will be placed in a directory named `output`.
 
@@ -80,7 +78,7 @@ The resulting RPMs will be placed in a directory named `output`.
 
 Once your packages are built, you can install them with `yum`. `cd` to the appropriate directory, and run:
 
-    yum localinstall --nogpgcheck kernel-ml-aufs-3.19.0-1.el6.x86_64.rpm
+    yum localinstall --nogpgcheck kernel-lt-aufs-3.19.0-1.el6.x86_64.rpm
 
 In order to use docker on EL6, you'll need to install it out of EPEL:
 
