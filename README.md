@@ -1,4 +1,4 @@
-# kernel-lt-aufs: `kernel-lt` with AUFS Support
+# `kernel-lt-aufs`: `kernel-lt` with AUFS Support
 
 This repository contains the specfile and config files to build [kernel-lt](http://elrepo.org/tiki/kernel-lt) kernels that include AUFS for use with Docker. The Docker spec files that were part of the [original repo](https://github.com/sciurus/docker-rhel-rpm.git) are no longer included.
 
@@ -22,6 +22,8 @@ The second is to install the packages from Fedora Copr:
 * [.repo file for EL7](https://copr.fedorainfracloud.org/coprs/bnied/kernel-lt-aufs/repo/epel-7/bnied-kernel-lt-aufs-epel-7.repo)
 
 The Copr repo will only ever contain the most recently-built packages, where the spaceduck.org one should include historical RPMs as well. Please keep in mind that new packages are built as time allows, and that updates to this repo will often appear before the packages are built.
+
+*If you want these packages to be your default kernel in GRUB*: edit `/etc/sysconfig/kernel`, and change `DEFAULTKERNEL` to `DEFAULTKERNEL=kernel-lt-aufs`.
 
 ***
 ## Building Packages
