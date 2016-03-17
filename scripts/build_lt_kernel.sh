@@ -116,7 +116,7 @@ rm -rf aufs-standalone
 
 # Create our SRPM
 echo "Creating source RPM..."
-mock -r epel-$EL_VERSION-x86_64 --buildsrpm --spec kernel-lt-aufs-$VERSION.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
+mock -r epel-$EL_VERSION-$ARCH --buildsrpm --spec kernel-lt-aufs-$VERSION.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
 
 # If we built the SRPM successfully, report that
 if [ $? -eq 0 ]; then
@@ -129,7 +129,7 @@ fi
 # Only build our binary RPMs if we didn't specify SRPM_ONLY
 if [ -z "$SRPM_ONLY" ]; then
   echo "Building binary RPMs..."
-  mock -r epel-$EL_VERSION-x86_64 --rebuild --resultdir rpms rpms/kernel-lt-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
+  mock -r epel-$EL_VERSION-$ARCH --rebuild --resultdir rpms rpms/kernel-lt-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
   if [ $? -eq 0 ]; then
     echo "RPMs created successfully!"
   fi
