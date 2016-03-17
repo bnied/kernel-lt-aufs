@@ -52,7 +52,7 @@ else
 fi
 
 # Set the EL arch for mock
-if [ $ARCH -eq "i686" ]; then
+if [ $ARCH == "i686" ]; then
   MOCK_ARCH="i386"
 else
   MOCK_ARCH=$ARCH
