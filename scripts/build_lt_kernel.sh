@@ -51,6 +51,13 @@ else
   RPM_EL_VERSION="el6"
 fi
 
+# Set the EL arch for mock
+if [ $ARCH -eq "1686" ]; then
+  MOCK_ARCH="i386"
+else
+  MOCK_ARCH=$ARCH
+fi
+
 # If our spec file is missing, exit
 if [ ! -f ../specs-el$EL_VERSION/kernel-lt-aufs-$VERSION.spec ]; then
   echo "Spec file not found for version $VERSION"
@@ -116,7 +123,7 @@ rm -rf aufs-standalone
 
 # Create our SRPM
 echo "Creating source RPM..."
-mock -r epel-$EL_VERSION-$ARCH --buildsrpm --spec kernel-lt-aufs-$VERSION.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
+mock -r epel-$EL_VERSION-$MOCK_ARCH --buildsrpm --spec kernel-lt-aufs-$VERSION.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
 
 # If we built the SRPM successfully, report that
 if [ $? -eq 0 ]; then
@@ -129,7 +136,7 @@ fi
 # Only build our binary RPMs if we didn't specify SRPM_ONLY
 if [ -z "$SRPM_ONLY" ]; then
   echo "Building binary RPMs..."
-  mock -r epel-$EL_VERSION-$ARCH --rebuild --resultdir rpms rpms/kernel-lt-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
+  mock -r epel-$EL_VERSION-$MOCK_ARCH --rebuild --resultdir rpms rpms/kernel-lt-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
   if [ $? -eq 0 ]; then
     echo "RPMs created successfully!"
   fi
