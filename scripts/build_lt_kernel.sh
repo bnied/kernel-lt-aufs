@@ -155,7 +155,7 @@ fi
 if [ $? -eq 0 ]; then
   if [ ! -d ~/RPMs/lt ]; then
     echo "Creating RPM directory..."
-    mkdir ~/RPMs/lt 2>&1
+    mkdir -p ~/RPMs/lt 2>&1
   fi
   echo "Moving to ~/RPMs/lt..."
   mv rpms/*.rpm ~/RPMs/lt
