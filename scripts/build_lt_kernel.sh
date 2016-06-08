@@ -44,6 +44,9 @@ if [ -z "$EL_VERSION" ]; then
   read EL_VERSION
 fi
 
+# Announce what we've been asked to build LOUDLY
+echo "\n\n***BUILDING KERNEL $VERSION/$ARCH FOR EL$EL_VERSION***\n\n"
+
 # Set the EL version tag for the RPMs
 if [ $EL_VERSION -eq 7 ]; then
   RPM_EL_VERSION="el7.centos"
