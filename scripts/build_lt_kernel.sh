@@ -44,9 +44,6 @@ if [ -z "$EL_VERSION" ]; then
   read EL_VERSION
 fi
 
-# Announce what we've been asked to build LOUDLY
-echo "\n\n***BUILDING KERNEL $VERSION/$ARCH FOR EL$EL_VERSION***\n\n"
-
 # Set the EL version tag for the RPMs
 if [ $EL_VERSION -eq 7 ]; then
   RPM_EL_VERSION="el7.centos"
@@ -81,6 +78,9 @@ if [ ! -f ../configs-el$EL_VERSION/config-$FULL_VERSION-$ARCH ]; then
   echo "Config file not found for $FULL_VERSION-$ARCH"
   exit 1
 fi
+
+# Announce what we've been asked to build LOUDLY
+printf "***KERNEL-LT-AUFS BUILD COMMENCING ***\n\n\tKernel Version:\t$FULL_VERSION\n\tArchitecture:\t$ARCH\n\tEL Version:\t$EL_VERSION\n\n"
 
 # See if we already have a build directory; if we do, nuke it
 if [ -d "build" ]; then
