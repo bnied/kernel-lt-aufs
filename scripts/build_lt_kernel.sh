@@ -83,7 +83,7 @@ fi
 printf "*********** KERNEL-LT-AUFS BUILD COMMENCING ***********\n\n\t* Kernel Version:\t$FULL_VERSION"
 printf "\n\t* Architecture:\t$ARCH"
 printf "\n\t* EL Version:\t$EL_VERSION"
-printf "\n\n*******************************************************"
+printf "\n\n*******************************************************\n\n"
 
 # See if we already have a build directory; if we do, nuke it
 if [ -d "build" ]; then
