@@ -80,7 +80,8 @@ if [ ! -f ../configs-el$EL_VERSION/config-$FULL_VERSION-$ARCH ]; then
 fi
 
 # Announce what we've been asked to build LOUDLY
-printf "*********** KERNEL-LT-AUFS BUILD COMMENCING ***********\n\n\t* Kernel Version:\t$FULL_VERSION"
+printf "*********** KERNEL-ML-AUFS BUILD COMMENCING ***********"
+printf "\n\n\t* Version:\t$FULL_VERSION"
 printf "\n\t* Architecture:\t$ARCH"
 printf "\n\t* EL Version:\t$EL_VERSION"
 printf "\n\n*******************************************************\n\n"
