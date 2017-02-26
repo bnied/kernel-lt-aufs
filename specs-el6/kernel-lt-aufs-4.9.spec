@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 4.4.52
+%define LKAver 4.9.13
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -13,15 +13,15 @@
 # Use either --without <option> on your rpmbuild command line
 # or force the values to 0, here, to disable them.
 
-# kernel-lt-aufs
+# not a btrfs filesystem: /var/lib/mock
 %define with_std          %{?_without_std:          0} %{?!_without_std:          1}
-# kernel-lt-aufs-NONPAE
+# kernel-ml-aufs-NONPAE
 %define with_nonpae       %{?_without_nonpae:       0} %{?!_without_nonpae:       1}
-# kernel-lt-aufs-doc
+# kernel-ml-aufs-doc
 %define with_doc          %{?_without_doc:          0} %{?!_without_doc:          1}
-# kernel-lt-aufs-headers
+# kernel-ml-aufs-headers
 %define with_headers      %{?_without_headers:      0} %{?!_without_headers:      1}
-# kernel-lt-aufs-firmware
+# kernel-ml-aufs-firmware
 %define with_firmware     %{?_without_firmware:     0} %{?!_without_firmware:     1}
 # perf subpackage
 %define with_perf         %{?_without_perf:         0} %{?!_without_perf:         1}
@@ -30,7 +30,7 @@
 # use dracut instead of mkinitrd
 %define with_dracut       %{?_without_dracut:       0} %{?!_without_dracut:       1}
 
-# Build only the kernel-lt-aufs-doc & kernel-lt-aufs-firmware packages.
+# Build only the kernel-ml-aufs-doc & kernel-ml-aufs-firmware packages.
 %ifarch noarch
 %define with_std 0
 %define with_nonpae 0
@@ -39,7 +39,7 @@
 %define with_vdso_install 0
 %endif
 
-# Build only the 32-bit kernel-lt-aufs-headers package.
+# Build only the 32-bit kernel-ml-aufs-headers package.
 %ifarch i386
 %define with_std 0
 %define with_nonpae 0
@@ -49,14 +49,14 @@
 %define with_vdso_install 0
 %endif
 
-# Build only the 32-bit kernel-lt-aufs packages.
+# Build only the 32-bit kernel-ml-aufs packages.
 %ifarch i686
 %define with_doc 0
 %define with_headers 0
 %define with_firmware 0
 %endif
 
-# Build only the 64-bit kernel-lt-aufs-headers & kernel-lt-aufs packages.
+# Build only the 64-bit kernel-ml-aufs-headers & kernel-ml-aufs packages.
 %ifarch x86_64
 %define with_nonpae 0
 %define with_doc 0
@@ -120,11 +120,11 @@
 %define initrd_prereq mkinitrd >= 6.0.61-1
 %endif
 
-Name: kernel-lt-aufs
+Name: kernel-ml-aufs
 Summary: The Linux kernel. (The core of any Linux-based operating system.)
 Group: System Environment/Kernel
 License: GPLv2
-URL: http://www.kernel.org/
+URL: https://www.kernel.org/
 Version: %{pkg_version}
 Release: %{pkg_release}
 ExclusiveArch: noarch i386 i686 x86_64
@@ -150,12 +150,12 @@ Conflicts: %{package_conflicts}
 Conflicts: %{kernel_headers_conflicts}
 # We can't let RPM do the dependencies automatically because it'll then pick up
 # a correct but undesirable perl dependency from the module headers which
-# isn't required for the kernel-lt-aufs proper to function.
+# isn't required for the kernel-ml-aufs proper to function.
 AutoReq: no
 AutoProv: yes
 
 #
-# List the packages used during the kernel-lt-aufs build.
+# List the packages used during the kernel-ml-aufs build.
 #
 BuildRequires: asciidoc, bash >= 2.03, bc, binutils >= 2.12, bzip2, diffutils
 BuildRequires: findutils, gawk, gcc >= 3.4.2, gzip, m4, make >= 3.78
@@ -226,7 +226,7 @@ Conflicts: %{package_conflicts}
 Conflicts: %{kernel_headers_conflicts}
 # We can't let RPM do the dependencies automatically because it'll then pick up
 # a correct but undesirable perl dependency from the module headers which
-# isn't required for the kernel-lt-aufs proper to function.
+# isn't required for the kernel-ml-aufs proper to function.
 AutoReq: no
 AutoProv: yes
 %description NONPAE
@@ -323,6 +323,10 @@ patch -p 1 < ../%{AUFSver}/aufs4-mmap.patch
 %{__cp} %{SOURCE1} .
 %{__cp} %{SOURCE2} .
 %{__cp} %{SOURCE3} .
+
+# Remove unnecessary files.
+/usr/bin/find . -type f \( -name .gitignore -o -name .mailmap \) | xargs --no-run-if-empty %{__rm} -f
+
 popd > /dev/null
 
 %build
@@ -487,7 +491,7 @@ hwcap 1 nosegneg"
     while read i
     do
         echo -n "${i#$RPM_BUILD_ROOT/lib/modules/%{KVRFA}/} " >> modinfo
-	/sbin/modinfo -l $i >> modinfo
+        /sbin/modinfo -l $i >> modinfo
     done < modnames
 
     egrep -v 'GPL( v2)?$|Dual BSD/GPL$|Dual MPL/GPL$|GPL and additional rights$' modinfo && exit 1
@@ -521,7 +525,8 @@ BuildKernel NONPAE
 
 %if %{with_doc}
 # Make the HTML and man pages.
-%{__make} -s htmldocs mandocs 2> /dev/null
+%{__make} -s %{?_smp_mflags} htmldocs 2> /dev/null
+%{__make} -s %{?_smp_mflags} mandocs 2> /dev/null
 
 # Sometimes non-world-readable files sneak into the kernel source tree.
 %{__chmod} -R a=rX Documentation
@@ -530,7 +535,7 @@ BuildKernel NONPAE
 
 %if %{with_perf}
 %global perf_make \
-    %{__make} -s -C tools/perf %{?_smp_mflags} WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 prefix=%{_prefix}
+    %{__make} -s -C tools/perf %{?_smp_mflags} prefix=%{_prefix} WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1
 
 %{perf_make} all
 %{perf_make} man
@@ -619,7 +624,7 @@ fi
 
 %post
 if [ `uname -i` == "i386" ] && [ -f /etc/sysconfig/kernel ]; then
-    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-lt-aufs-NONPAE$/DEFAULTKERNEL=kernel-lt-aufs/' /etc/sysconfig/kernel || exit $?
+    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-ml-aufs-NONPAE$/DEFAULTKERNEL=kernel-ml-aufs/' /etc/sysconfig/kernel || exit $?
 fi
 if grep --silent '^hwcap 0 nosegneg$' /etc/ld.so.conf.d/kernel-*.conf 2> /dev/null; then
     /bin/sed -i '/^hwcap 0 nosegneg$/ s/0/1/' /etc/ld.so.conf.d/kernel-*.conf
@@ -664,7 +669,7 @@ fi
 
 %post NONPAE
 if [ `uname -i` == "i386" ] && [ -f /etc/sysconfig/kernel ]; then
-    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-lt-aufs$/DEFAULTKERNEL=kernel-lt-aufs-NONPAE/' /etc/sysconfig/kernel || exit $?
+    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-ml-aufs$/DEFAULTKERNEL=kernel-ml-aufs-NONPAE/' /etc/sysconfig/kernel || exit $?
 fi
 /sbin/new-kernel-pkg --package %{name}-NONPAE --install %{version}-%{release}NONPAE.%{_target_cpu} || exit $?
 
@@ -762,7 +767,7 @@ fi
 %if %{with_headers}
 %files headers
 %defattr(-,root,root)
-/usr/include/*
+%{_includedir}/*
 %endif
 
 %if %{with_firmware}
@@ -775,19 +780,66 @@ fi
 %if %{with_perf}
 %files -n perf
 %defattr(-,root,root)
-/etc/bash_completion.d/perf
 %{_bindir}/perf
 %{_bindir}/trace
 %dir %{_libdir}/traceevent/plugins
 %{_libdir}/traceevent/plugins/*
 %dir %{_libexecdir}/perf-core
 %{_libexecdir}/perf-core/*
-%{_mandir}/man[1-8]/*
+%{_mandir}/man[1-8]/perf*
 %dir %{_datadir}/perf-core
 %{_datadir}/perf-core/*
+%{_sysconfdir}/bash_completion.d/perf
+%{_datadir}/doc/perf-tip/*
+%dir %{_datadir}/doc/perf-tip
 %endif
 
 %changelog
+* Tue Mar 15 2016 Ben Nied <spacewreckage@gmail.com> - 4.5.0-1
+- Added AUFS features for Kernel 4.5.
+
+* Mon Mar 14 2016 Alan Bartlett <ajb@elrepo.org> - 4.5.0-1
+- Updated with the 4.5 source tarball.
+
+* Thu Mar 10 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.5-1
+- Updated with the 4.4.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.5]
+
+* Fri Mar 04 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.4-1
+- Updated with the 4.4.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.4]
+
+* Thu Feb 25 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.3-1
+- Updated with the 4.4.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.3]
+
+* Thu Feb 18 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.2-1
+- Updated with the 4.4.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.2]
+
+* Sun Jan 31 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.1-1
+- Updated with the 4.4.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.1]
+
+* Tue Jan 26 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.0-2
+- CONFIG_SCSI_MPT2SAS=m [http://elrepo.org/bugs/view.php?id=628]
+
+* Mon Jan 11 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.0-1
+- Updated with the 4.4 source tarball.
+
+* Tue Dec 15 2015 Alan Bartlett <ajb@elrepo.org> - 4.3.3-1
+- Updated with the 4.3.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.3.3]
+
+* Thu Dec 10 2015 Alan Bartlett <ajb@elrepo.org> - 4.3.2-1
+- Updated with the 4.3.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.3.2]
+
+* Thu Dec 10 2015 Alan Bartlett <ajb@elrepo.org> - 4.3.1-1
+- Updated with the 4.3.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.3.1]
+- CONFIG_VXFS_FS=m [http://elrepo.org/bugs/view.php?id=606]
+
 * Mon Nov 02 2015 Alan Bartlett <ajb@elrepo.org> - 4.3.0-1
 - Updated with the 4.3 source tarball.
 
@@ -813,7 +865,7 @@ fi
 
 * Tue Sep 08 2015 Alan Bartlett <ajb*elrepo.org> - 4.2.0-2
 - Rebuilt with the configuration adjusted as requested
-- by JCPunk [http://elrepo.org/bugs/view.php?id=592]
+- by JCPunk [https://elrepo.org/bugs/view.php?id=592]
 - CONFIG_HAVE_CLK=y, CONFIG_X86_INTEL_LPSS=y, CONFIG_PM_CLK=y,
 - CONFIG_I2C_MUX_PINCTRL=m, CONFIG_I2C_DESIGNWARE_PLATFORM=m,
 - CONFIG_SPI_PXA2XX_PCI=m, CONFIG_PINCTRL=y, CONFIG_PINCTRL_BAYTRAIL=y,
@@ -855,7 +907,7 @@ fi
 
 * Mon Jun 22 2015 Alan Bartlett <ajb@elrepo.org> - 4.1.0-1
 - Updated with the 4.1 source tarball.
-- CONFIG_BRIDGE_NETFILTER=y [http://elrepo.org/bugs/view.php?id=573]
+- CONFIG_BRIDGE_NETFILTER=y [https://elrepo.org/bugs/view.php?id=573]
 
 * Sun Jun 07 2015 Alan Bartlett <ajb@elrepo.org> - 4.0.5-1
 - Updated with the 4.0.5 source tarball.
@@ -907,8 +959,8 @@ fi
 * Wed Jan 28 2015 Alan Bartlett <ajb@elrepo.org> - 3.18.4-1
 - Updated with the 3.18.4 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.18.4]
-- CONFIG_THUNDERBOLT=m [http://lists.elrepo.org/pipermail/elrepo/2015-January/002516.html]
-- CONFIG_OVERLAY_FS=m [http://elrepo.org/bugs/view.php?id=548]
+- CONFIG_THUNDERBOLT=m [https://lists.elrepo.org/pipermail/elrepo/2015-January/002516.html]
+- CONFIG_OVERLAY_FS=m [https://elrepo.org/bugs/view.php?id=548]
 
 * Fri Jan 16 2015 Alan Bartlett <ajb@elrepo.org> - 3.18.3-1
 - Updated with the 3.18.3 source tarball.
@@ -937,7 +989,7 @@ fi
 - Updated with the 3.17.4 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.17.4]
 - CONFIG_CHROME_PLATFORMS=y, CONFIG_CHROMEOS_LAPTOP=m and
-- CONFIG_CHROMEOS_PSTORE=m [http://elrepo.org/bugs/view.php?id=532]
+- CONFIG_CHROMEOS_PSTORE=m [https://elrepo.org/bugs/view.php?id=532]
 
 * Sat Nov 15 2014 Alan Bartlett <ajb@elrepo.org> - 3.17.3-1
 - Updated with the 3.17.3 source tarball.
@@ -954,9 +1006,9 @@ fi
 * Mon Oct 06 2014 Alan Bartlett <ajb@elrepo.org> - 3.17.0-1
 - Updated with the 3.17 source tarball.
 - CONFIG_NUMA_BALANCING=y and CONFIG_NUMA_BALANCING_DEFAULT_ENABLED=y
-- [http://elrepo.org/bugs/view.php?id=509]
+- [https://elrepo.org/bugs/view.php?id=509]
 - CONFIG_9P_FS=m, CONFIG_9P_FSCACHE=y and CONFIG_9P_FS_POSIX_ACL=y
-- [http://elrepo.org/bugs/view.php?id=510]
+- [https://elrepo.org/bugs/view.php?id=510]
 
 * Thu Sep 18 2014 Alan Bartlett <ajb@elrepo.org> - 3.16.3-1
 - Updated with the 3.16.3 source tarball.
@@ -966,13 +1018,13 @@ fi
 - Updated with the 3.16.2 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.16.2]
 - CONFIG_RCU_NOCB_CPU=y and CONFIG_RCU_NOCB_CPU_ALL=y
-- [http://elrepo.org/bugs/view.php?id=505]
+- [https://elrepo.org/bugs/view.php?id=505]
 
 * Thu Aug 14 2014 Alan Bartlett <ajb@elrepo.org> - 3.16.1-1
 - Updated with the 3.16.1 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.16.1]
 - CONFIG_ATH9K_DEBUGFS=y, CONFIG_ATH9K_HTC_DEBUGFS=y and
-- CONFIG_ATH10K_DEBUGFS=y [http://elrepo.org/bugs/view.php?id=501]
+- CONFIG_ATH10K_DEBUGFS=y [https://elrepo.org/bugs/view.php?id=501]
 
 * Mon Aug 04 2014 Alan Bartlett <ajb@elrepo.org> - 3.16.0-1
 - Updated with the 3.16 source tarball.
@@ -985,7 +1037,7 @@ fi
 - Updated with the 3.15.7 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.15.7]
 - CONFIG_INTEL_MEI=m and CONFIG_INTEL_MEI_ME=m
-- [http://elrepo.org/bugs/view.php?id=493]
+- [https://elrepo.org/bugs/view.php?id=493]
 
 * Fri Jul 18 2014 Alan Bartlett <ajb@elrepo.org> - 3.15.6-1
 - Updated with the 3.15.6 source tarball.
@@ -1033,12 +1085,12 @@ fi
 * Sun Apr 27 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.2-1
 - Updated with the 3.14.2 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.2]
-- CONFIG_FANOTIFY=y [http://elrepo.org/bugs/view.php?id=470]
+- CONFIG_FANOTIFY=y [https://elrepo.org/bugs/view.php?id=470]
 
 * Mon Apr 14 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.1-1
 - Updated with the 3.14.1 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.1]
-- CONFIG_ZSWAP=y [http://elrepo.org/bugs/view.php?id=467]
+- CONFIG_ZSWAP=y [https://elrepo.org/bugs/view.php?id=467]
 
 * Mon Mar 31 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.0-1
 - Updated with the 3.14 source tarball.
@@ -1050,7 +1102,7 @@ fi
 * Fri Mar 07 2014 Alan Bartlett <ajb@elrepo.org> - 3.13.6-1
 - Updated with the 3.13.6 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.13.6]
-- CONFIG_CIFS_SMB2=y [http://elrepo.org/bugs/view.php?id=461]
+- CONFIG_CIFS_SMB2=y [https://elrepo.org/bugs/view.php?id=461]
 
 * Sun Feb 23 2014 Alan Bartlett <ajb@elrepo.org> - 3.13.5-1
 - Updated with the 3.13.5 source tarball.
@@ -1059,12 +1111,12 @@ fi
 * Fri Feb 21 2014 Alan Bartlett <ajb@elrepo.org> - 3.13.4-1
 - Updated with the 3.13.4 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.13.4]
-- CONFIG_USER_NS=y [http://elrepo.org/bugs/view.php?id=455]
+- CONFIG_USER_NS=y [https://elrepo.org/bugs/view.php?id=455]
 
 * Fri Feb 14 2014 Alan Bartlett <ajb@elrepo.org> - 3.13.3-1
 - Updated with the 3.13.3 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.13.3]
-- CONFIG_ACPI_HOTPLUG_MEMORY=y [http://elrepo.org/bugs/view.php?id=454]
+- CONFIG_ACPI_HOTPLUG_MEMORY=y [https://elrepo.org/bugs/view.php?id=454]
 
 * Fri Feb 07 2014 Alan Bartlett <ajb@elrepo.org> - 3.13.2-1
 - Updated with the 3.13.2 source tarball.
@@ -1084,7 +1136,7 @@ fi
 * Fri Jan 10 2014 Alan Bartlett <ajb@elrepo.org> - 3.12.7-1
 - Updated with the 3.12.7 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.12.7]
-- CONFIG_L2TP=m, CONFIG_PPPOL2TP=m [http://elrepo.org/bugs/view.php?id=443]
+- CONFIG_L2TP=m, CONFIG_PPPOL2TP=m [https://elrepo.org/bugs/view.php?id=443]
 
 * Fri Dec 20 2013 Alan Bartlett <ajb@elrepo.org> - 3.12.6-1
 - Updated with the 3.12.6 source tarball.
@@ -1109,7 +1161,7 @@ fi
 * Thu Nov 21 2013 Alan Bartlett <ajb@elrepo.org> - 3.12.1-1
 - Updated with the 3.12.1 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.12.1]
-- CONFIG_HFS_FS=m and CONFIG_HFSPLUS_FS=m [http://elrepo.org/bugs/view.php?id=427]
+- CONFIG_HFS_FS=m and CONFIG_HFSPLUS_FS=m [https://elrepo.org/bugs/view.php?id=427]
 
 * Mon Nov 04 2013 Alan Bartlett <ajb@elrepo.org> - 3.12.0-1
 - Updated with the 3.12 source tarball.
@@ -1135,7 +1187,7 @@ fi
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.11.2]
 
 * Mon Sep 16 2013 Alan Bartlett <ajb@elrepo.org> - 3.11.1-2
-- CONFIG_BCACHE=m [http://elrepo.org/bugs/view.php?id=407]
+- CONFIG_BCACHE=m [https://elrepo.org/bugs/view.php?id=407]
 
 * Sat Sep 14 2013 Alan Bartlett <ajb@elrepo.org> - 3.11.1-1
 - Updated with the 3.11.1 source tarball.
@@ -1261,7 +1313,7 @@ fi
 * Wed Mar 13 2013 Alan Bartlett <ajb@elrepo.org> - 3.8.2-2
 - CONFIG_X86_X2APIC=y, CONFIG_X86_NUMACHIP disabled, CONFIG_X86_UV=y,
 - CONFIG_SGI_XP=m, CONFIG_SGI_GRU=m, CONFIG_SGI_GRU_DEBUG disabled
-- and CONFIG_UV_MMTIMER=m [http://elrepo.org/bugs/view.php?id=368]
+- and CONFIG_UV_MMTIMER=m [https://elrepo.org/bugs/view.php?id=368]
 
 * Tue Mar 04 2013 Alan Bartlett <ajb@elrepo.org> - 3.8.2-1
 - Updated with the 3.8.2 source tarball.
@@ -1270,7 +1322,7 @@ fi
 * Tue Feb 28 2013 Alan Bartlett <ajb@elrepo.org> - 3.8.1-1
 - Updated with the 3.8.1 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.8.1]
-- CONFIG_IPV6_SUBTREES=y and CONFIG_IPV6_MROUTE_MULTIPLE_TABLES=y [http://elrepo.org/bugs/view.php?id=354]
+- CONFIG_IPV6_SUBTREES=y and CONFIG_IPV6_MROUTE_MULTIPLE_TABLES=y [https://elrepo.org/bugs/view.php?id=354]
 
 * Tue Feb 19 2013 Alan Bartlett <ajb@elrepo.org> - 3.8.0-1
 - Updated with the 3.8 source tarball.
@@ -1298,7 +1350,7 @@ fi
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.7.5]
 
 * Sun Jan 27 2013 Alan Bartlett <ajb@elrepo.org> - 3.7.4-2
-- Correcting an issue with the configuration files. [http://elrepo.org/bugs/view.php?id=347]
+- Correcting an issue with the configuration files. [https://elrepo.org/bugs/view.php?id=347]
 
 * Tue Jan 22 2013 Alan Bartlett <ajb@elrepo.org> - 3.7.4-1
 - Updated with the 3.7.4 source tarball.
@@ -1308,25 +1360,25 @@ fi
 - Updated with the 3.7.3 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.7.3]
 - Adjusted this specification file to ensure that the arch/%%{asmarch}/syscalls/
-- directory is copied to the build/ directory. [http://elrepo.org/bugs/view.php?id=344]
+- directory is copied to the build/ directory. [https://elrepo.org/bugs/view.php?id=344]
 
 * Sat Jan 12 2013 Alan Bartlett <ajb@elrepo.org> - 3.7.2-1
 - Updated with the 3.7.2 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.7.2]
 
 * Thu Jan 10 2013 Alan Bartlett <ajb@elrepo.org> - 3.7.1-3
-- CONFIG_UFS_FS=m [http://elrepo.org/bugs/view.php?id=342]
-- Further adjustments to this specification file. [http://elrepo.org/bugs/view.php?id=340]
+- CONFIG_UFS_FS=m [https://elrepo.org/bugs/view.php?id=342]
+- Further adjustments to this specification file. [https://elrepo.org/bugs/view.php?id=340]
 
 * Mon Dec 31 2012 Alan Bartlett <ajb@elrepo.org> - 3.7.1-2
 - Adjusted this specification file to ensure that a copy of the version.h file is
-- present in the include/linux/ directory. [http://elrepo.org/bugs/view.php?id=340]
+- present in the include/linux/ directory. [https://elrepo.org/bugs/view.php?id=340]
 
 * Tue Dec 18 2012 Alan Bartlett <ajb@elrepo.org> - 3.7.1-1
 - Updated with the 3.7.1 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.7.1]
 - Added WERROR=0 to the perf 'make' line to enable the 32-bit
-- perf package to be built. [http://elrepo.org/bugs/view.php?id=335]
+- perf package to be built. [https://elrepo.org/bugs/view.php?id=335]
 
 * Wed Dec 12 2012 Alan Bartlett <ajb@elrepo.org> - 3.7.0-1
 - Updated with the 3.7 source tarball.
@@ -1342,8 +1394,8 @@ fi
 * Mon Nov 26 2012 Alan Bartlett <ajb@elrepo.org> - 3.6.8-1
 - Updated with the 3.6.8 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.6.8]
-- CONFIG_MAC80211_DEBUGFS=y and CONFIG_ATH_DEBUG=y [http://elrepo.org/bugs/view.php?id=326]
-- CONFIG_ATH9K_RATE_CONTROL disabled [http://elrepo.org/bugs/view.php?id=327]
+- CONFIG_MAC80211_DEBUGFS=y and CONFIG_ATH_DEBUG=y [https://elrepo.org/bugs/view.php?id=326]
+- CONFIG_ATH9K_RATE_CONTROL disabled [https://elrepo.org/bugs/view.php?id=327]
 
 * Sun Nov 18 2012 Alan Bartlett <ajb@elrepo.org> - 3.6.7-1
 - Updated with the 3.6.7 source tarball.
@@ -1370,7 +1422,7 @@ fi
 * Sat Oct 13 2012 Alan Bartlett <ajb@elrepo.org> - 3.6.2-1
 - Updated with the 3.6.2 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.6.2]
-- CONFIG_SCSI_SCAN_ASYNC disabled [http://elrepo.org/bugs/view.php?id=317]
+- CONFIG_SCSI_SCAN_ASYNC disabled [https://elrepo.org/bugs/view.php?id=317]
 - CONFIG_AIC79XX_REG_PRETTY_PRINT disabled and CONFIG_SCSI_AIC7XXX_OLD=m
 
 * Mon Oct 08 2012 Alan Bartlett <ajb@elrepo.org> - 3.6.1-2
@@ -1406,7 +1458,7 @@ fi
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.5.1]
 
 * Tue Jul 24 2012 Alan Bartlett <ajb@elrepo.org> - 3.5.0-2
-- Rebuilt with RTLLIB support enabled. [http://elrepo.org/bugs/view.php?id=289]
+- Rebuilt with RTLLIB support enabled. [https://elrepo.org/bugs/view.php?id=289]
 
 * Mon Jul 23 2012 Alan Bartlett <ajb@elrepo.org> - 3.5.0-1
 - Updated with the 3.5 source tarball.

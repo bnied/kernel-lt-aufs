@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 4.4.52
+%define LKAver 4.9.13
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -13,11 +13,11 @@
 # Use either --without <option> on your rpmbuild command line
 # or force the values to 0, here, to disable them.
 
-# kernel-lt-aufs
+# kernel-ml-aufs
 %define with_default %{?_without_default: 0} %{?!_without_default: 1}
-# kernel-lt-aufs-doc
+# kernel-ml-aufs-doc
 %define with_doc     %{?_without_doc:     0} %{?!_without_doc:     1}
-# kernel-lt-aufs-headers
+# kernel-ml-aufs-headers
 %define with_headers %{?_without_headers: 0} %{?!_without_headers: 1}
 # perf
 %define with_perf    %{?_without_perf:    0} %{?!_without_perf:    1}
@@ -43,14 +43,14 @@
 %endif
 
 %ifarch i686
-# 32-bit kernel-lt-aufs, headers, perf & tools.
+# 32-bit kernel-ml-aufs, headers, perf & tools.
 %define buildarch i386
 %define hdrarch i386
 %define with_doc 0
 %endif
 
 %ifarch x86_64
-# 64-bit kernel-lt-aufs, headers, perf & tools.
+# 64-bit kernel-ml-aufs, headers, perf & tools.
 %define with_doc 0
 %endif
 
@@ -75,15 +75,16 @@
 %define kernel_dot_org_conflicts ppp < 2.4.3-3, isdn4k-utils < 3.2-32, nfs-utils < 1.0.7-12, e2fsprogs < 1.37-4, util-linux < 2.12, jfsutils < 1.1.7-2, reiserfs-utils < 3.6.19-2, xfsprogs < 2.6.13-4, procps < 3.2.5-6.3, oprofile < 0.9.1-2, device-mapper-libs < 1.02.63-2, mdadm < 3.2.1-5
 
 #
-# Then a series of requirements that are distribution specific, either
-# because we add patches for something or the older versions have
-# problems with the newer kernel or lack certain things that make
-# integration in the distro harder than needed.
+# Then a series of requirements that are distribution specific, either because
+# the older versions have problems with the newer kernel or lack certain things
+# that make integration in the distro harder than needed.
 #
 %define package_conflicts initscripts < 7.23, udev < 063-6, iptables < 1.3.2-1, ipw2200-firmware < 2.4, iwl4965-firmware < 228.57.2, selinux-policy-targeted < 1.25.3-14, squashfs-tools < 4.0, wireless-tools < 29-3
 
+#
 # We moved the drm include files into kernel-headers, make sure there's
 # a recent enough libdrm-devel on the system that doesn't have those.
+#
 %define kernel_headers_conflicts libdrm-devel < 2.4.0-0.15
 
 #
@@ -92,7 +93,7 @@
 %define kernel_prereq fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubby >= 8.28-2
 %define initrd_prereq dracut >= 001-7
 
-Name: kernel-lt-aufs
+Name: kernel-ml-aufs
 Summary: The Linux kernel. (The core of any Linux-based operating system.)
 Group: System Environment/Kernel
 License: GPLv2
@@ -123,25 +124,25 @@ Requires(post): %{_sbindir}/new-kernel-pkg
 Requires(preun): %{_sbindir}/new-kernel-pkg
 Conflicts: %{kernel_dot_org_conflicts}
 Conflicts: %{package_conflicts}
-# We can't let RPM do the dependencies automatic because it'll then pick up
+# We can't let RPM do the dependencies automatically because it'll then pick up
 # a correct but undesirable perl dependency from the module headers which
-# isn't required for the kernel proper to function
+# isn't required for the kernel-ml-aufs proper to function.
 AutoReq: no
 AutoProv: yes
 
 #
-# List the packages used during the kernel build
+# List the packages used during the kernel-ml-aufs build.
 #
 BuildRequires: asciidoc, bash >= 2.03, bc, binutils >= 2.12, diffutils, findutils
 BuildRequires: gawk, gcc >= 3.4.2, gzip, hostname, m4, make >= 3.78, module-init-tools
 BuildRequires: net-tools, openssl, openssl-devel, patch >= 2.5.4, perl
 BuildRequires: redhat-rpm-config >= 9.1.0-55, sh-utils, tar, xmlto, xz
 %if %{with_perf}
-BuildRequires: audit-libs-devel, binutils-devel, bison, elfutils-devel, newt-devel, numactl-devel,
-BuildRequires: perl(ExtUtils::Embed), python-devel, slang-devel, xz-devel, zlib-devel
+BuildRequires: audit-libs-devel, binutils-devel, bison, elfutils-devel, libunwind-devel, newt-devel
+BuildRequires: numactl-devel, perl(ExtUtils::Embed), python-devel, slang-devel, xz-devel, zlib-devel
 %endif
 %if %{with_tools}
-BuildRequires: gettext, pciutils, pciutils-devel, zlib-devel
+BuildRequires: gettext, ncurses-devel, pciutils, pciutils-devel, zlib-devel
 %endif
 
 # Sources.
@@ -161,7 +162,7 @@ Linux-based operating system. The kernel handles the basic functions
 of the OS: memory allocation, process allocation, device I/O, etc.
 
 %package devel
-Summary: Development package for building modules to match the kernel.
+Summary: Development package for building kernel modules to match the kernel.
 Group: System Environment/Kernel
 Provides: kernel-devel = %{version}-%{release}
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}
@@ -286,7 +287,29 @@ cp ../%{AUFSver}/include/uapi/linux/aufs_type.h include/uapi/linux/
 patch -p 1 < ../%{AUFSver}/aufs4-kbuild.patch
 patch -p 1 < ../%{AUFSver}/aufs4-base.patch
 patch -p 1 < ../%{AUFSver}/aufs4-mmap.patch
+#####################
+#%{__cp} %{SOURCE1} .
+#%{__cp} %{SOURCE2} .
+#####################
 %{__cp} %{SOURCE3} .
+
+# Run make listnewconfig over all the configuration files.
+%ifarch i686 || x86_64
+for C in config-*-%{_target_cpu}*
+do
+    %{__cp} $C .config
+    %{__make} -s ARCH=%{buildarch} listnewconfig | grep -E '^CONFIG_' > .newoptions || true
+    if [ -s .newoptions ]; then
+        cat .newoptions
+    exit 1
+    fi
+    %{__rm} .newoptions
+done
+%endif
+
+# Remove unnecessary files.
+/usr/bin/find . -type f \( -name .gitignore -o -name .mailmap \) | xargs --no-run-if-empty %{__rm} -f
+
 popd > /dev/null
 
 %build
@@ -484,7 +507,8 @@ BuildKernel
 
 %if %{with_doc}
 # Make the HTML and man pages.
-%{__make} -s htmldocs mandocs 2> /dev/null
+%{__make} -s %{?_smp_mflags} htmldocs 2> /dev/null
+%{__make} -s %{?_smp_mflags} mandocs 2> /dev/null
 
 # Sometimes non-world-readable files sneak into the kernel source tree.
 %{__chmod} -R a=rX Documentation
@@ -493,7 +517,7 @@ BuildKernel
 
 %if %{with_perf}
 %global perf_make \
-    %{__make} -s -C tools/perf %{?_smp_mflags} WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 prefix=%{_prefix}
+    %{__make} -s -C tools/perf %{?_smp_mflags} prefix=%{_prefix} WERROR=0 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1
 
 %{perf_make} all
 %{perf_make} man
@@ -503,21 +527,23 @@ BuildKernel
 %ifarch x86_64
 # Make sure that version-gen.sh is executable.
 %{__chmod} +x tools/power/cpupower/utils/version-gen.sh
-
-%{__make} -s %{?_smp_mflags} -C tools/power/cpupower CPUFREQ_BENCH=false
-
-pushd tools/power/cpupower/debug/x86_64 > /dev/null
-%{__make} -s %{?_smp_mflags} centrino-decode powernow-k8-decode
+pushd tools/power/cpupower > /dev/null
+%{__make} -s CPUFREQ_BENCH=false
 popd > /dev/null
-
+pushd tools/power/cpupower/debug/x86_64 > /dev/null
+%{__make} -s centrino-decode
+%{__make} -s powernow-k8-decode
+popd > /dev/null
 pushd tools/power/x86/x86_energy_perf_policy > /dev/null
 %{__make} -s
 popd > /dev/null
-
 pushd tools/power/x86/turbostat > /dev/null
 %{__make} -s
 popd > /dev/null
 %endif
+pushd tools/thermal/tmon > /dev/null
+%{__make} -s
+popd > /dev/null
 %endif
 
 popd > /dev/null
@@ -560,7 +586,7 @@ MAN9DIR=$RPM_BUILD_ROOT%{_datadir}/man/man9
 /usr/bin/find Documentation/DocBook/man -type f -name '*.9.gz' -print0 \
     | xargs -0 --no-run-if-empty %{__cp} -u -t $MAN9DIR
 /usr/bin/find $MAN9DIR -type f -name '*.9.gz' -print0 \
-    | xargs -0 --no-run-if-empty %{__chmod} 444
+    | xargs -0 --no-run-if-empty %{__chmod} 644
 ls $MAN9DIR | grep -q '' || > $MAN9DIR/BROKEN
 %endif
 
@@ -586,8 +612,9 @@ pushd tools/power/cpupower/debug/x86_64 > /dev/null
 %{__install} -m755 powernow-k8-decode %{buildroot}%{_bindir}/powernow-k8-decode
 popd > /dev/null
 %{__chmod} 0755 %{buildroot}%{_libdir}/libcpupower.so*
-%{__mkdir_p} %{buildroot}%{_unitdir} %{buildroot}%{_sysconfdir}/sysconfig
+%{__mkdir_p} %{buildroot}%{_unitdir}
 %{__install} -m644 %{SOURCE4} %{buildroot}%{_unitdir}/cpupower.service
+%{__mkdir_p} %{buildroot}%{_sysconfdir}/sysconfig
 %{__install} -m644 %{SOURCE5} %{buildroot}%{_sysconfdir}/sysconfig/cpupower
 %{__mkdir_p} %{buildroot}%{_mandir}/man8
 pushd tools/power/x86/x86_energy_perf_policy > /dev/null
@@ -596,7 +623,12 @@ popd > /dev/null
 pushd tools/power/x86/turbostat > /dev/null
 %{__make} -s DESTDIR=%{buildroot} install
 popd > /dev/null
+/usr/bin/find %{buildroot}%{_mandir} -type f -print0 \
+    | xargs -0 --no-run-if-empty %{__chmod} 644
 %endif
+pushd tools/thermal/tmon > /dev/null
+%{__install} -m755 tmon %{buildroot}%{_bindir}/tmon
+popd > /dev/null
 %endif
 
 popd > /dev/null
@@ -667,13 +699,14 @@ fi
 
 %files devel
 %defattr(-,root,root)
+%dir /usr/src/kernels
 /usr/src/kernels/%{version}-%{release}.%{_target_cpu}
 %endif
 
 %if %{with_headers}
 %files headers
 %defattr(-,root,root)
-/usr/include/*
+%{_includedir}/*
 %endif
 
 %if %{with_doc}
@@ -698,6 +731,8 @@ fi
 %dir %{_datadir}/perf-core
 %{_datadir}/perf-core/*
 %{_sysconfdir}/bash_completion.d/perf
+%{_datadir}/doc/perf-tip/*
+%dir %{_datadir}/doc/perf-tip
 
 %files -n python-perf
 %defattr(-,root,root)
@@ -712,18 +747,19 @@ fi
 %{_bindir}/cpupower
 %{_bindir}/centrino-decode
 %{_bindir}/powernow-k8-decode
+%{_bindir}/x86_energy_perf_policy
+%{_bindir}/turbostat
+%{_bindir}/tmon
+%config(noreplace) %{_sysconfdir}/sysconfig/cpupower
 %{_unitdir}/cpupower.service
 %{_mandir}/man[1-8]/cpupower*
-%config(noreplace) %{_sysconfdir}/sysconfig/cpupower
-%{_bindir}/x86_energy_perf_policy
 %{_mandir}/man8/x86_energy_perf_policy*
-%{_bindir}/turbostat
 %{_mandir}/man8/turbostat*
 
 %files -n %{name}-tools-libs
 %defattr(-,root,root)
 %{_libdir}/libcpupower.so.0
-%{_libdir}/libcpupower.so.0.0.0
+%{_libdir}/libcpupower.so.0.0.1
 
 %files -n %{name}-tools-libs-devel
 %defattr(-,root,root)
@@ -733,6 +769,51 @@ fi
 %endif
 
 %changelog
+* Tue Mar 15 2016 Ben Nied <spacewreckage@gmail.com> - 4.5.0-1
+- Added AUFS features for Kernel 4.5.
+
+* Mon Mar 14 2016 Alan Bartlett <ajb@elrepo.org> - 4.5.0-1
+- Updated with the 4.5 source tarball.
+
+* Thu Mar 10 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.5-1
+- Updated with the 4.4.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.5]
+
+* Fri Mar 04 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.4-1
+- Updated with the 4.4.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.4]
+
+* Thu Feb 25 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.3-1
+- Updated with the 4.4.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.3]
+
+* Thu Feb 18 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.2-1
+- Updated with the 4.4.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.2]
+
+* Sun Jan 31 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.1-1
+- Updated with the 4.4.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.1]
+
+* Tue Jan 26 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.0-2
+- CONFIG_SCSI_MPT2SAS=m [http://elrepo.org/bugs/view.php?id=628]
+
+* Mon Jan 11 2016 Alan Bartlett <ajb@elrepo.org> - 4.4.0-1
+- Updated with the 4.4 source tarball.
+
+* Tue Dec 15 2015 Alan Bartlett <ajb@elrepo.org> - 4.3.3-1
+- Updated with the 4.3.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.3.3]
+
+* Thu Dec 10 2015 Alan Bartlett <ajb@elrepo.org> - 4.3.2-1
+- Updated with the 4.3.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.3.2]
+
+* Thu Dec 10 2015 Alan Bartlett <ajb@elrepo.org> - 4.3.1-1
+- Updated with the 4.3.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.3.1]
+- CONFIG_VXFS_FS=m [http://elrepo.org/bugs/view.php?id=606]
+
 * Mon Nov 02 2015 Alan Bartlett <ajb@elrepo.org> - 4.3.0-1
 - Updated with the 4.3 source tarball.
 
@@ -975,56 +1056,56 @@ fi
 
 * Sun Jun 08 2014 Alan Bartlett <ajb@elrepo.org> - 3.15.0-0.rc8
 - Updated with the 3.15 source tarball.
-- The eighth release candidate of a kernel-lt-aufs package set for EL7.
+- The eighth release candidate of a kernel-ml-aufs package set for EL7.
 
 * Sun Jun 08 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.6-0.rc7
 - Updated with the 3.14.6 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.6]
-- The seventh release candidate of a kernel-lt-aufs package set for EL7.
+- The seventh release candidate of a kernel-ml-aufs package set for EL7.
 
 * Wed Jun 04 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.5-0.rc6
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.5]
-- The sixth release candidate of a kernel-lt-aufs package set for EL7.
-- Added a "Conflicts:" line for the kernel-lt-aufs-doc package.
+- The sixth release candidate of a kernel-ml-aufs package set for EL7.
+- Added a "Conflicts:" line for the kernel-ml-aufs-doc package.
 
 * Mon Jun 02 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.5-0.rc5
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.5]
-- The fifth release candidate of a kernel-lt-aufs package set for EL7.
+- The fifth release candidate of a kernel-ml-aufs package set for EL7.
 - CONFIG_SECURITY_TOMOYO_ACTIVATION_TRIGGER="/usr/lib/systemd/systemd"
-- Corrected the "Conflicts:" line for the kernel-lt-aufs-tools-libs-devel
+- Corrected the "Conflicts:" line for the kernel-ml-aufs-tools-libs-devel
 - package. [Akemi Yagi]
 
 * Sun Jun 01 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.5-0.rc4
 - Updated with the 3.14.5 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.5]
-- The fourth release candidate of a kernel-lt-aufs package set for EL7.
-- Added a "Conflicts:" line for the kernel-lt-aufs-tools,
-- kernel-lt-aufs-tools-libs & kernel-lt-aufs-tools-devel packages.
+- The fourth release candidate of a kernel-ml-aufs package set for EL7.
+- Added a "Conflicts:" line for the kernel-ml-aufs-tools,
+- kernel-ml-aufs-tools-libs & kernel-ml-aufs-tools-devel packages.
 
 * Wed May 28 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.rc3
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The third release candidate of a kernel-lt-aufs package set for EL7.
+- The third release candidate of a kernel-ml-aufs package set for EL7.
 - Fix a problem with the symlink between the /usr/src/$(uname -r)/
 - directory and the /lib/modules/$(uname -r)/build directory.
 
 * Sat May 24 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.rc2
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The second release candidate of a kernel-lt-aufs package set for EL7.
+- The second release candidate of a kernel-ml-aufs package set for EL7.
 - Add calls of weak-modules to the %%posttrans & %%preun scripts.
 
 * Tue May 20 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.rc1
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
 - Skip the beta phase.
-- The first release candidate of a kernel-lt-aufs package set for EL7.
+- The first release candidate of a kernel-ml-aufs package set for EL7.
 
 * Mon May 19 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.alpha3
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The third attempt to build a kernel-lt-aufs package set for EL7.
+- The third attempt to build a kernel-ml-aufs package set for EL7.
 
 * Sun May 18 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.alpha2
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The second attempt to build a kernel-lt-aufs package set for EL7.
+- The second attempt to build a kernel-ml-aufs package set for EL7.
 
 * Sat May 17 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.alpha1
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The first attempt to build a kernel-lt-aufs package set for EL7.
+- The first attempt to build a kernel-ml-aufs package set for EL7.
