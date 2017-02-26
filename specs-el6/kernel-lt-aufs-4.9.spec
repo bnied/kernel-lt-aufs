@@ -15,13 +15,13 @@
 
 # not a btrfs filesystem: /var/lib/mock
 %define with_std          %{?_without_std:          0} %{?!_without_std:          1}
-# kernel-ml-aufs-NONPAE
+# kernel-lt-aufs-NONPAE
 %define with_nonpae       %{?_without_nonpae:       0} %{?!_without_nonpae:       1}
-# kernel-ml-aufs-doc
+# kernel-lt-aufs-doc
 %define with_doc          %{?_without_doc:          0} %{?!_without_doc:          1}
-# kernel-ml-aufs-headers
+# kernel-lt-aufs-headers
 %define with_headers      %{?_without_headers:      0} %{?!_without_headers:      1}
-# kernel-ml-aufs-firmware
+# kernel-lt-aufs-firmware
 %define with_firmware     %{?_without_firmware:     0} %{?!_without_firmware:     1}
 # perf subpackage
 %define with_perf         %{?_without_perf:         0} %{?!_without_perf:         1}
@@ -30,7 +30,7 @@
 # use dracut instead of mkinitrd
 %define with_dracut       %{?_without_dracut:       0} %{?!_without_dracut:       1}
 
-# Build only the kernel-ml-aufs-doc & kernel-ml-aufs-firmware packages.
+# Build only the kernel-lt-aufs-doc & kernel-lt-aufs-firmware packages.
 %ifarch noarch
 %define with_std 0
 %define with_nonpae 0
@@ -39,7 +39,7 @@
 %define with_vdso_install 0
 %endif
 
-# Build only the 32-bit kernel-ml-aufs-headers package.
+# Build only the 32-bit kernel-lt-aufs-headers package.
 %ifarch i386
 %define with_std 0
 %define with_nonpae 0
@@ -49,14 +49,14 @@
 %define with_vdso_install 0
 %endif
 
-# Build only the 32-bit kernel-ml-aufs packages.
+# Build only the 32-bit kernel-lt-aufs packages.
 %ifarch i686
 %define with_doc 0
 %define with_headers 0
 %define with_firmware 0
 %endif
 
-# Build only the 64-bit kernel-ml-aufs-headers & kernel-ml-aufs packages.
+# Build only the 64-bit kernel-lt-aufs-headers & kernel-lt-aufs packages.
 %ifarch x86_64
 %define with_nonpae 0
 %define with_doc 0
@@ -120,7 +120,7 @@
 %define initrd_prereq mkinitrd >= 6.0.61-1
 %endif
 
-Name: kernel-ml-aufs
+Name: kernel-lt-aufs
 Summary: The Linux kernel. (The core of any Linux-based operating system.)
 Group: System Environment/Kernel
 License: GPLv2
@@ -150,12 +150,12 @@ Conflicts: %{package_conflicts}
 Conflicts: %{kernel_headers_conflicts}
 # We can't let RPM do the dependencies automatically because it'll then pick up
 # a correct but undesirable perl dependency from the module headers which
-# isn't required for the kernel-ml-aufs proper to function.
+# isn't required for the kernel-lt-aufs proper to function.
 AutoReq: no
 AutoProv: yes
 
 #
-# List the packages used during the kernel-ml-aufs build.
+# List the packages used during the kernel-lt-aufs build.
 #
 BuildRequires: asciidoc, bash >= 2.03, bc, binutils >= 2.12, bzip2, diffutils
 BuildRequires: findutils, gawk, gcc >= 3.4.2, gzip, m4, make >= 3.78
@@ -226,7 +226,7 @@ Conflicts: %{package_conflicts}
 Conflicts: %{kernel_headers_conflicts}
 # We can't let RPM do the dependencies automatically because it'll then pick up
 # a correct but undesirable perl dependency from the module headers which
-# isn't required for the kernel-ml-aufs proper to function.
+# isn't required for the kernel-lt-aufs proper to function.
 AutoReq: no
 AutoProv: yes
 %description NONPAE
@@ -624,7 +624,7 @@ fi
 
 %post
 if [ `uname -i` == "i386" ] && [ -f /etc/sysconfig/kernel ]; then
-    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-ml-aufs-NONPAE$/DEFAULTKERNEL=kernel-ml-aufs/' /etc/sysconfig/kernel || exit $?
+    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-lt-aufs-NONPAE$/DEFAULTKERNEL=kernel-lt-aufs/' /etc/sysconfig/kernel || exit $?
 fi
 if grep --silent '^hwcap 0 nosegneg$' /etc/ld.so.conf.d/kernel-*.conf 2> /dev/null; then
     /bin/sed -i '/^hwcap 0 nosegneg$/ s/0/1/' /etc/ld.so.conf.d/kernel-*.conf
@@ -669,7 +669,7 @@ fi
 
 %post NONPAE
 if [ `uname -i` == "i386" ] && [ -f /etc/sysconfig/kernel ]; then
-    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-ml-aufs$/DEFAULTKERNEL=kernel-ml-aufs-NONPAE/' /etc/sysconfig/kernel || exit $?
+    /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel-lt-aufs$/DEFAULTKERNEL=kernel-lt-aufs-NONPAE/' /etc/sysconfig/kernel || exit $?
 fi
 /sbin/new-kernel-pkg --package %{name}-NONPAE --install %{version}-%{release}NONPAE.%{_target_cpu} || exit $?
 

@@ -13,11 +13,11 @@
 # Use either --without <option> on your rpmbuild command line
 # or force the values to 0, here, to disable them.
 
-# kernel-ml-aufs
+# kernel-lt-aufs
 %define with_default %{?_without_default: 0} %{?!_without_default: 1}
-# kernel-ml-aufs-doc
+# kernel-lt-aufs-doc
 %define with_doc     %{?_without_doc:     0} %{?!_without_doc:     1}
-# kernel-ml-aufs-headers
+# kernel-lt-aufs-headers
 %define with_headers %{?_without_headers: 0} %{?!_without_headers: 1}
 # perf
 %define with_perf    %{?_without_perf:    0} %{?!_without_perf:    1}
@@ -43,14 +43,14 @@
 %endif
 
 %ifarch i686
-# 32-bit kernel-ml-aufs, headers, perf & tools.
+# 32-bit kernel-lt-aufs, headers, perf & tools.
 %define buildarch i386
 %define hdrarch i386
 %define with_doc 0
 %endif
 
 %ifarch x86_64
-# 64-bit kernel-ml-aufs, headers, perf & tools.
+# 64-bit kernel-lt-aufs, headers, perf & tools.
 %define with_doc 0
 %endif
 
@@ -93,7 +93,7 @@
 %define kernel_prereq fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubby >= 8.28-2
 %define initrd_prereq dracut >= 001-7
 
-Name: kernel-ml-aufs
+Name: kernel-lt-aufs
 Summary: The Linux kernel. (The core of any Linux-based operating system.)
 Group: System Environment/Kernel
 License: GPLv2
@@ -126,12 +126,12 @@ Conflicts: %{kernel_dot_org_conflicts}
 Conflicts: %{package_conflicts}
 # We can't let RPM do the dependencies automatically because it'll then pick up
 # a correct but undesirable perl dependency from the module headers which
-# isn't required for the kernel-ml-aufs proper to function.
+# isn't required for the kernel-lt-aufs proper to function.
 AutoReq: no
 AutoProv: yes
 
 #
-# List the packages used during the kernel-ml-aufs build.
+# List the packages used during the kernel-lt-aufs build.
 #
 BuildRequires: asciidoc, bash >= 2.03, bc, binutils >= 2.12, diffutils, findutils
 BuildRequires: gawk, gcc >= 3.4.2, gzip, hostname, m4, make >= 3.78, module-init-tools
@@ -1056,56 +1056,56 @@ fi
 
 * Sun Jun 08 2014 Alan Bartlett <ajb@elrepo.org> - 3.15.0-0.rc8
 - Updated with the 3.15 source tarball.
-- The eighth release candidate of a kernel-ml-aufs package set for EL7.
+- The eighth release candidate of a kernel-lt-aufs package set for EL7.
 
 * Sun Jun 08 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.6-0.rc7
 - Updated with the 3.14.6 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.6]
-- The seventh release candidate of a kernel-ml-aufs package set for EL7.
+- The seventh release candidate of a kernel-lt-aufs package set for EL7.
 
 * Wed Jun 04 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.5-0.rc6
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.5]
-- The sixth release candidate of a kernel-ml-aufs package set for EL7.
-- Added a "Conflicts:" line for the kernel-ml-aufs-doc package.
+- The sixth release candidate of a kernel-lt-aufs package set for EL7.
+- Added a "Conflicts:" line for the kernel-lt-aufs-doc package.
 
 * Mon Jun 02 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.5-0.rc5
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.5]
-- The fifth release candidate of a kernel-ml-aufs package set for EL7.
+- The fifth release candidate of a kernel-lt-aufs package set for EL7.
 - CONFIG_SECURITY_TOMOYO_ACTIVATION_TRIGGER="/usr/lib/systemd/systemd"
-- Corrected the "Conflicts:" line for the kernel-ml-aufs-tools-libs-devel
+- Corrected the "Conflicts:" line for the kernel-lt-aufs-tools-libs-devel
 - package. [Akemi Yagi]
 
 * Sun Jun 01 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.5-0.rc4
 - Updated with the 3.14.5 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.5]
-- The fourth release candidate of a kernel-ml-aufs package set for EL7.
-- Added a "Conflicts:" line for the kernel-ml-aufs-tools,
-- kernel-ml-aufs-tools-libs & kernel-ml-aufs-tools-devel packages.
+- The fourth release candidate of a kernel-lt-aufs package set for EL7.
+- Added a "Conflicts:" line for the kernel-lt-aufs-tools,
+- kernel-lt-aufs-tools-libs & kernel-lt-aufs-tools-devel packages.
 
 * Wed May 28 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.rc3
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The third release candidate of a kernel-ml-aufs package set for EL7.
+- The third release candidate of a kernel-lt-aufs package set for EL7.
 - Fix a problem with the symlink between the /usr/src/$(uname -r)/
 - directory and the /lib/modules/$(uname -r)/build directory.
 
 * Sat May 24 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.rc2
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The second release candidate of a kernel-ml-aufs package set for EL7.
+- The second release candidate of a kernel-lt-aufs package set for EL7.
 - Add calls of weak-modules to the %%posttrans & %%preun scripts.
 
 * Tue May 20 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.rc1
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
 - Skip the beta phase.
-- The first release candidate of a kernel-ml-aufs package set for EL7.
+- The first release candidate of a kernel-lt-aufs package set for EL7.
 
 * Mon May 19 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.alpha3
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The third attempt to build a kernel-ml-aufs package set for EL7.
+- The third attempt to build a kernel-lt-aufs package set for EL7.
 
 * Sun May 18 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.alpha2
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The second attempt to build a kernel-ml-aufs package set for EL7.
+- The second attempt to build a kernel-lt-aufs package set for EL7.
 
 * Sat May 17 2014 Alan Bartlett <ajb@elrepo.org> - 3.14.4-0.alpha1
 - [https://www.kernel.org/pub/linux/kernel/v3.x/ChangeLog-3.14.4]
-- The first attempt to build a kernel-ml-aufs package set for EL7.
+- The first attempt to build a kernel-lt-aufs package set for EL7.
