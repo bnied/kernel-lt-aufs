@@ -146,7 +146,7 @@ BuildRequires: gettext, ncurses-devel, pciutils, pciutils-devel, zlib-devel
 %endif
 
 # Sources.
-Source0: ftp://ftp.kernel.org/pub/linux/kernel/v4.x/linux-%{LKAver}.tar.xz
+Source0: https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-%{LKAver}.tar.xz
 #######################################
 #Source1: config-%{version}-i686
 #Source2: config-%{version}-i686-NONPAE
