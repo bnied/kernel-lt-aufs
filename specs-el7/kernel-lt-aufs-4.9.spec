@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 4.9.25
+%define LKAver 4.9.26
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
