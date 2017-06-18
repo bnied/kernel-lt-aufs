@@ -136,7 +136,8 @@ rm -rf aufs-standalone
 
 # Create our SRPM
 echo "Creating source RPM..."
-mock -r epel-$EL_VERSION-$MOCK_ARCH --buildsrpm --spec kernel-lt-aufs-$VERSION.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
+ln kernel-lt-aufs-$VERSION.spec kernel-lt-aufs.spec
+mock -r epel-$EL_VERSION-$MOCK_ARCH --buildsrpm --spec kernel-lt-aufs.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
 
 # If we built the SRPM successfully, report that
 if [ $? -eq 0 ]; then
