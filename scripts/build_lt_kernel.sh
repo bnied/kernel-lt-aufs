@@ -108,7 +108,7 @@ cd build
 
 # Grab the source files for our kernel version
 echo "Grabbing kernel source..."
-spectool -g -C . kernel-lt-aufs-$VERSION.spec > logs/spectool.log 2>&1
+spectool -g -C . kernel-lt-aufs.spec > logs/spectool.log 2>&1
 
 # Clone the AUFS repo
 if [[ $VERSION =~ ^4 ]]; then
