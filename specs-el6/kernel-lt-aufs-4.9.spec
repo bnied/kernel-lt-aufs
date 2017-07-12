@@ -54,6 +54,7 @@
 %define with_doc 0
 %define with_headers 0
 %define with_firmware 0
+%define with_perf 0
 %endif
 
 # Build only the 64-bit kernel-lt-aufs-headers & kernel-lt-aufs packages.
@@ -61,6 +62,7 @@
 %define with_nonpae 0
 %define with_doc 0
 %define with_firmware 0
+%define with_perf 0
 %endif
 
 # Define the asmarch.
