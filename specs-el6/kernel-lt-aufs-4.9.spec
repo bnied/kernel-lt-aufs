@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 4.9.37
+%define LKAver 4.9.38
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -54,7 +54,6 @@
 %define with_doc 0
 %define with_headers 0
 %define with_firmware 0
-%define with_perf 0
 %endif
 
 # Build only the 64-bit kernel-lt-aufs-headers & kernel-lt-aufs packages.
@@ -62,7 +61,6 @@
 %define with_nonpae 0
 %define with_doc 0
 %define with_firmware 0
-%define with_perf 0
 %endif
 
 # Define the asmarch.

@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 4.9.37
+%define LKAver 4.9.38
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -47,13 +47,11 @@
 %define buildarch i386
 %define hdrarch i386
 %define with_doc 0
-%define with_perf 0
 %endif
 
 %ifarch x86_64
 # 64-bit kernel-lt-aufs, headers, perf & tools.
 %define with_doc 0
-%define with_perf 0
 %endif
 
 # Determine the sublevel number and set pkg_version.
