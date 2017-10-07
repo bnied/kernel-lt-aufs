@@ -325,6 +325,9 @@ BuildKernel() {
         %{__cp} config-%{version}-%{_target_cpu}-${Flavour} .config
     fi
 
+    # Dirty hack
+    %{__make} olddefconfig
+
     %define KVRFA %{version}-%{release}${Flavour}.%{_target_cpu}
 
     # Set the EXTRAVERSION string in the main Makefile.
