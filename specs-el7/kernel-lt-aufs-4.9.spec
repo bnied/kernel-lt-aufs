@@ -293,20 +293,6 @@ patch -p 1 < ../%{AUFSver}/aufs4-mmap.patch
 #####################
 %{__cp} %{SOURCE3} .
 
-# Run make listnewconfig over all the configuration files.
-%ifarch i686 || x86_64
-for C in config-*-%{_target_cpu}*
-do
-    %{__cp} $C .config
-    %{__make} -s ARCH=%{buildarch} listnewconfig | grep -E '^CONFIG_' > .newoptions || true
-    if [ -s .newoptions ]; then
-        cat .newoptions
-    exit 1
-    fi
-    %{__rm} .newoptions
-done
-%endif
-
 # Remove unnecessary files.
 /usr/bin/find . -type f \( -name .gitignore -o -name .mailmap \) | xargs --no-run-if-empty %{__rm} -f
 
