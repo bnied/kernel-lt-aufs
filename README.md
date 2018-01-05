@@ -36,9 +36,9 @@ Be aware that building the kernel can take a long time (at least half an hour, u
 ***
 ### Using the Build Script
 
-Run the `build_kernel.sh` script, and either answer all three questions, or provide them as command-line parameters:
+Run the `build_lt_kernel.sh` script, and either answer all three questions, or provide them as command-line parameters:
 
-    $ ./build_kernel.sh
+    $ ./build_lt_kernel.sh
     What kernel version do you want to build? (major version only)
     3.19
     What architecture do you want to build for? (i686, i686-NONPAE, x86_64)
@@ -48,7 +48,7 @@ Run the `build_kernel.sh` script, and either answer all three questions, or prov
 
 or
 
-    $ ./build_kernel.sh -v=3.19 -a=x86_64 -e=7
+    $ ./build_lt_kernel.sh -v=3.19 -a=x86_64 -e=7
 
 This will build your packages automatically. Logs for the build can be found in two places:
 * `$(REPO_LOCATION)/build/logs` has the output from each command in separate log files.
