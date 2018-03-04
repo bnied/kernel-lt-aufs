@@ -161,7 +161,13 @@ fi
 # If we built the RPMs successfully, report that
 if [ $? -eq 0 ]; then
   # Now that we've tested the source RPM, we can submit it to copr
-  copr-cli build kernel-lt-aufs --nowait -r epel-$EL_VERSION-$MOCK_ARCH rpms/kernel-lt-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm
+  echo "Submitting build to Copr..."
+  copr-cli build kernel-lt-aufs --nowait -r epel-$EL_VERSION-$MOCK_ARCH rpms/kernel-lt-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/copr_submission.log 2>&1
+  if [ $? -eq 0 ]; then
+    echo "Submitted to Copr successfully!"
+  else
+    echo "Submitted to Copr failed! See log for details."
+  fi
   if [ ! -d ~/RPMs/lt ]; then
     echo "Creating RPM directory..."
     mkdir -p ~/RPMs/lt 2>&1
