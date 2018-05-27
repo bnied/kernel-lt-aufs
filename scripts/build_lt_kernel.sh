@@ -46,7 +46,7 @@ fi
 
 # Set the EL version tag for the RPMs
 if [ $EL_VERSION -eq 7 ]; then
-  RPM_EL_VERSION="el7.centos"
+  RPM_EL_VERSION="el7"
 else
   RPM_EL_VERSION="el6"
 fi
