@@ -116,7 +116,7 @@ if [[ $VERSION =~ ^4 ]]; then
   if [[ $VERSION == "4.14" ]]; then
     echo "Cloning AUFS 4.14.56+..."
     # 4.1 kernels > 4.14.56 have their own branch; take this out once kernel-lt moves on.
-    git clone git://github.com/sfjro/aufs4-standalone.git -b aufs4.14.56++ aufs-standalone > logs/aufs-git.log 2>&1
+    git clone git://github.com/sfjro/aufs4-standalone.git -b aufs4.14.56+ aufs-standalone > logs/aufs-git.log 2>&1
   else
     echo "Cloning AUFS 4.x normally..."
     git clone git://github.com/sfjro/aufs4-standalone.git -b aufs$VERSION aufs-standalone > logs/aufs-git.log 2>&1
