@@ -95,7 +95,7 @@ mkdir -p build/rpms
 echo "Copying spec file and config file(s) to build directory..."
 cp -a ../specs-el$EL_VERSION/kernel-lt-aufs-$VERSION.spec build/kernel-lt-aufs.spec
 cp -a ../configs-el$EL_VERSION/config-$FULL_VERSION-* build/
-if [ $EL_VERSION -eq 7 ]; then
+if [ $EL_VERSION -ne 6 ]; then
   cp -a ../configs-el7/cpupower* build
 fi
 
