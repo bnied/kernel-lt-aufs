@@ -45,11 +45,7 @@ if [ -z "$EL_VERSION" ]; then
 fi
 
 # Set the EL version tag for the RPMs
-if [ $EL_VERSION -eq 7 ]; then
-  RPM_EL_VERSION="el7"
-else
-  RPM_EL_VERSION="el6"
-fi
+RPM_EL_VERSION="el${EL_VERSION}"
 
 # Set the EL arch for mock
 if [ $ARCH == "i686" ]; then
@@ -133,9 +129,16 @@ git archive $HEAD_COMMIT > ../aufs-standalone.tar
 popd 2>&1 > /dev/null
 rm -rf aufs-standalone
 
+# Select our mock config
+if [ $EL_VERSION -eq 8 ]; then
+  MOCK_CONFIG="rhelbeta-8-${MOCK_ARCH}"
+else
+  MOCK_CONFIG="epel-${EL_VERSION}-${MOCK_ARCH}"
+fi
+
 # Create our SRPM
 echo "Creating source RPM..."
-mock -r epel-$EL_VERSION-$MOCK_ARCH --buildsrpm --spec kernel-lt-aufs.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
+mock -r $MOCK_CONFIG --buildsrpm --spec kernel-lt-aufs.spec --sources . --resultdir rpms > logs/srpm_generation.log 2>&1
 
 # If we built the SRPM successfully, report that
 if [ $? -eq 0 ]; then
@@ -148,7 +151,7 @@ fi
 # Only build our binary RPMs if we didn't specify SRPM_ONLY
 if [ -z "$SRPM_ONLY" ]; then
   echo "Building binary RPMs..."
-  mock -r epel-$EL_VERSION-$MOCK_ARCH --rebuild --resultdir rpms rpms/kernel-lt-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
+  mock -r $MOCK_CONFIG --rebuild --resultdir rpms rpms/kernel-lt-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/rpm_generation.log 2>&1
   if [ $? -eq 0 ]; then
     echo "RPMs created successfully!"
   else
@@ -161,7 +164,7 @@ fi
 if [ $? -eq 0 ]; then
   # Now that we've tested the source RPM, we can submit it to copr
   echo "Submitting build to Copr..."
-  copr-cli build kernel-lt-aufs --nowait -r epel-$EL_VERSION-$MOCK_ARCH rpms/kernel-lt-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/copr_submission.log 2>&1
+  copr-cli build kernel-lt-aufs --nowait -r $MOCK_CONFIG rpms/kernel-lt-aufs-$FULL_VERSION-1.$RPM_EL_VERSION.src.rpm > logs/copr_submission.log 2>&1
   if [ $? -eq 0 ]; then
     echo "Submitted to Copr successfully!"
   else
