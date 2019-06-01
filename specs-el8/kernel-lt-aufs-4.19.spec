@@ -281,9 +281,9 @@ cp -r ../%{AUFSver}/Documentation/filesystems Documentation/
 cp -r ../%{AUFSver}/Documentation/ABI Documentation/
 cp -r ../%{AUFSver}/fs/aufs fs/
 cp ../%{AUFSver}/include/uapi/linux/aufs_type.h include/uapi/linux/
-patch -p 1 < ../%{AUFSver}/aufs5-kbuild.patch
-patch -p 1 < ../%{AUFSver}/aufs5-base.patch
-patch -p 1 < ../%{AUFSver}/aufs5-mmap.patch
+patch -p 1 < ../%{AUFSver}/aufs4-kbuild.patch
+patch -p 1 < ../%{AUFSver}/aufs4-base.patch
+patch -p 1 < ../%{AUFSver}/aufs4-mmap.patch
 
 %{__cp} %{SOURCE1} .
 
