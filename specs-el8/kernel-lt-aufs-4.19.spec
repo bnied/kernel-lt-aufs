@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 4.19.48
+%define LKAver 4.19.49
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -732,7 +732,6 @@ fi
 %{_bindir}/tmon
 %config(noreplace) %{_sysconfdir}/sysconfig/cpupower
 %{_unitdir}/cpupower.service
-%{_prefix}/share/bash-completion/completions/cpupower
 %{_mandir}/man[1-8]/cpupower*
 %{_mandir}/man8/x86_energy_perf_policy*
 %{_mandir}/man8/turbostat*
