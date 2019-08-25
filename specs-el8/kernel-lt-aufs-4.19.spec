@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 4.19.67
+%define LKAver 4.19.68
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -101,7 +101,7 @@ BuildRequires: binutils-devel python3-docutils zlib-devel
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
 # Sources.
-Source0: https://www.kernel.org/pub/linux/kernel/v5.x/linux-%{LKAver}.tar.xz
+Source0: https://www.kernel.org/pub/linux/kernel/v4.x/linux-%{LKAver}.tar.xz
 Source1: config-%{version}-x86_64
 Source2: cpupower.service
 Source3: cpupower.config
@@ -356,9 +356,9 @@ cp -r ../%{AUFSver}/Documentation/filesystems Documentation/
 cp -r ../%{AUFSver}/Documentation/ABI Documentation/
 cp -r ../%{AUFSver}/fs/aufs fs/
 cp ../%{AUFSver}/include/uapi/linux/aufs_type.h include/uapi/linux/
-patch -p 1 < ../%{AUFSver}/aufs5-kbuild.patch
-patch -p 1 < ../%{AUFSver}/aufs5-base.patch
-patch -p 1 < ../%{AUFSver}/aufs5-mmap.patch
+patch -p 1 < ../%{AUFSver}/aufs4-kbuild.patch
+patch -p 1 < ../%{AUFSver}/aufs4-base.patch
+patch -p 1 < ../%{AUFSver}/aufs4-mmap.patch
 
 # Purge the source tree of all unrequired dot-files.
 find -name '.[a-z]*' -type f | xargs --no-run-if-empty %{__rm} -f
