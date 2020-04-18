@@ -137,7 +137,7 @@ BuildRequires: openssl, openssl-devel, patch >= 2.5.4, perl
 BuildRequires: redhat-rpm-config >= 9.1.0-55, sh-utils, tar, xmlto, xz
 %if %{with_perf}
 BuildRequires: audit-libs-devel, binutils-devel, bison, elfutils-devel
-BuildRequires: java-1.8.0-openjdk-devel, numactl-devel, perl(ExtUtils::Embed)
+BuildRequires: java-1.8.0-openjdk-devel, libcap-devel, numactl-devel, perl(ExtUtils::Embed)
 BuildRequires: python-devel, slang-devel, xz-devel, zlib-devel
 %endif
 %if %{with_tools}

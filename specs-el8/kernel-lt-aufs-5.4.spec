@@ -89,7 +89,7 @@ BuildRequires: asciidoc python3-sphinx xmlto
 %endif
 %if %{with_perf}
 BuildRequires: asciidoc audit-libs-devel binutils-devel bison
-BuildRequires: flex java-devel newt-devel numactl-devel
+BuildRequires: flex java-devel newt-devel libcap-devel numactl-devel
 BuildRequires: perl(ExtUtils::Embed) xmlto xz-devel zlib-devel
 %endif
 %if %{with_tools}
