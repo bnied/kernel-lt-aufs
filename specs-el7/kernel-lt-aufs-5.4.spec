@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 5.4.50
+%define LKAver 5.4.51
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -1251,7 +1251,7 @@ fi
 * Fri Feb 23 2018 Alan Bartlett <ajb@elrepo.org> - 4.15.5-1
 - Updated with the 4.15.5 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.15.5]
-- Reverted "libxfs: pack the agfl header structure so XFS_AGFL_SIZE 
+- Reverted "libxfs: pack the agfl header structure so XFS_AGFL_SIZE
 - is correct" [https://elrepo.org/bugs/view.php?id=829]
 
 * Sat Feb 17 2018 Alan Bartlett <ajb@elrepo.org> - 4.15.4-1
