@@ -3,15 +3,14 @@
 This repository contains the specfile and config files to build [kernel-lt](http://elrepo.org/tiki/kernel-lt) kernels that include AUFS for use with Docker. The Docker spec files that were part of the [original repo](https://github.com/sciurus/docker-rhel-rpm.git) are no longer included.
 
 This has been tested on the following distributions:
-* CentOS 6
 * CentOS 7
-* Red Hat Enterprise Linux 6
+* CentOS 8
 * Red Hat Enterprise Linux 7
-* Red Hat Enterprise Linux 8 (see note below, currently in beta)
+* Red Hat Enterprise Linux 8
 
 Other RHEL-derivatives should also work, but have not been tested.
 
-### EL8 SUPPORT IS IN BETA! The packages work, but are still being tested. Please install at your own risk!
+### EL6 support has ended. However, older kernel packages are available on `yum.spaceduck.org` for historical purposes.
 
 ***
 ## Downloading Prebuilt Packages
