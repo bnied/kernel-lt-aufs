@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 5.4.99
+%define LKAver 5.10.18
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -81,7 +81,7 @@ ExclusiveOS: Linux
 Requires: %{name}-core-uname-r = %{KVERREL}
 Requires: %{name}-modules-uname-r = %{KVERREL}
 BuildRequires: bash bc binutils bison bzip2 diffutils elfutils-devel findutils
-BuildRequires: flex gawk gcc git gzip hmaccalc hostname kmod m4 make net-tools
+BuildRequires: flex gawk gcc git gzip hmaccalc hostname kmod libcap-devel m4 make net-tools
 BuildRequires: openssl openssl-devel patch perl-Carp perl-devel perl-generators
 BuildRequires: perl-interpreter python3-devel redhat-rpm-config rsync sh-utils tar xz
 %if %{with_doc}
@@ -89,7 +89,7 @@ BuildRequires: asciidoc python3-sphinx xmlto
 %endif
 %if %{with_perf}
 BuildRequires: asciidoc audit-libs-devel binutils-devel bison
-BuildRequires: flex java-devel newt-devel libcap-devel numactl-devel
+BuildRequires: flex java-devel newt-devel numactl-devel
 BuildRequires: perl(ExtUtils::Embed) xmlto xz-devel zlib-devel
 %endif
 %if %{with_tools}
@@ -1002,6 +1002,7 @@ fi
 %{_bindir}/lsgpio
 %{_bindir}/gpio-hammer
 %{_bindir}/gpio-event-mon
+%{_bindir}/gpio-watch
 %{_bindir}/kvm_stat
 %config(noreplace) %{_sysconfdir}/sysconfig/cpupower
 %{_unitdir}/cpupower.service

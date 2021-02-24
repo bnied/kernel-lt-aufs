@@ -1,13 +1,13 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 5.4.99
+%define LKAver 5.10.18
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
 
 # Define the buildid, if required.
-#define buildid .
+#define buildid .local
 
 # The following build options are enabled by default.
 # Use either --without <option> on your rpmbuild command line
@@ -23,6 +23,8 @@
 %define with_perf    %{?_without_perf:    0} %{?!_without_perf:    1}
 # tools
 %define with_tools   %{?_without_tools:   0} %{?!_without_tools:   1}
+# gcc9
+%define with_gcc9    %{?_without_gcc9:    0} %{?!_without_gcc9:    1}
 
 # These architectures install vdso/ directories.
 %define vdso_arches i686 x86_64
@@ -43,14 +45,14 @@
 %endif
 
 %ifarch i686
-# 32-bit kernel-lt-aufs, headers, perf & tools.
+# 32-bit kernel-lt-aufs, headers, perf and tools.
 %define buildarch i386
 %define hdrarch i386
 %define with_doc 0
 %endif
 
 %ifarch x86_64
-# 64-bit kernel-lt-aufs, headers, perf & tools.
+# 64-bit kernel-lt-aufs, headers, perf and tools.
 %define with_doc 0
 %endif
 
@@ -63,7 +65,7 @@
 %endif
 
 # Set pkg_release.
-%define pkg_release 1%{?buildid}%{?dist}
+%define pkg_release %{lua:print(os.getenv("RELEASE_VERSION"))}%{?dist}%{?buildid}
 
 #
 # Three sets of minimum package version requirements in the form of Conflicts.
@@ -130,15 +132,20 @@ AutoProv: yes
 #
 # List the packages used during the kernel-lt-aufs build.
 #
-BuildRequires: asciidoc, bash >= 2.03, bc, binutils >= 2.12, diffutils
-BuildRequires: findutils, gawk, gcc >= 3.4.2 gzip, hostname, m4
-BuildRequires: make >= 3.78, module-init-tools, net-tools, newt-devel
-BuildRequires: openssl, openssl-devel, patch >= 2.5.4, perl
-BuildRequires: redhat-rpm-config >= 9.1.0-55, sh-utils, tar, xmlto, xz
+%if %{with_gcc9}
+BuildRequires: devtoolset-9-gcc, devtoolset-9-binutils, devtoolset-9-runtime, scl-utils
+%endif
+BuildRequires: devtoolset-9-gcc, devtoolset-9-binutils, devtoolset-9-runtime, scl-utils
+BuildRequires: asciidoc, bash >= 2.03, bc, bison, binutils >= 2.12, diffutils
+BuildRequires: elfutils-libelf-devel, findutils, gawk, gcc >= 3.4.2, gzip
+BuildRequires: hostname, m4, make >= 3.78, module-init-tools, net-tools
+BuildRequires: newt-devel, openssl, openssl-devel, patch >= 2.5.4, perl
+BuildRequires: redhat-rpm-config >= 9.1.0-55, rsync, sh-utils, tar, xmlto, xz
 %if %{with_perf}
-BuildRequires: audit-libs-devel, binutils-devel, bison, elfutils-devel
-BuildRequires: java-1.8.0-openjdk-devel, libcap-devel, numactl-devel, perl(ExtUtils::Embed)
-BuildRequires: python-devel, slang-devel, xz-devel, zlib-devel
+BuildRequires: audit-libs-devel, binutils-devel, elfutils-devel, git
+BuildRequires: java-1.8.0-openjdk-devel, libcap-devel, numactl-devel
+BuildRequires: perl(ExtUtils::Embed), python-devel, python3
+BuildRequires: slang-devel, xz-devel, zlib-devel
 %endif
 %if %{with_tools}
 BuildRequires: gettext, ncurses-devel, pciutils-devel
@@ -166,7 +173,7 @@ Provides: %{name}-devel = %{version}-%{release}
 Provides: %{name}-devel-%{_target_cpu} = %{version}-%{release}
 Provides: %{name}-devel-uname-r = %{version}-%{release}.%{_target_cpu}
 AutoReqProv: no
-Requires(pre): /usr/bin/find
+Requires(pre): %{_bindir}/find
 Requires: perl
 %description devel
 This package provides the kernel header files and makefiles
@@ -176,8 +183,8 @@ sufficient to build modules against the kernel package.
 %package doc
 Summary: Various bits of documentation found in the kernel sources.
 Group: Documentation
-Provides: kernel-doc = %{version}-%{release}
 Provides: %{name}-doc = %{version}-%{release}
+Provides: kernel-doc = %{version}-%{release}
 Conflicts: kernel-doc < %{version}-%{release}
 %description doc
 This package provides documentation files from the kernel sources.
@@ -192,14 +199,14 @@ options that can be passed to the kernel modules at load time.
 %package headers
 Summary: Header files of the kernel, for use by glibc.
 Group: Development/System
-Obsoletes: glibc-kernheaders < 3.0-46
 Provides: glibc-kernheaders = 3.0-46
-Provides: kernel-headers = %{version}-%{release}
+Obsoletes: glibc-kernheaders < 3.0-46
 Provides: %{name}-headers = %{version}-%{release}
+Provides: kernel-headers = %{version}-%{release}
 Conflicts: kernel-headers < %{version}-%{release}
 %description headers
 This package provides the C header files that specify the interface
-between the Linux kernel and userspace libraries & programs. The
+between the Linux kernel and userspace libraries and programs. The
 header files define structures and constants that are needed when
 building most standard programs. They are also required when
 rebuilding the glibc package.
@@ -270,6 +277,10 @@ libraries, derived from the kernel source.
 %define debug_package %{nil}
 
 %prep
+%if %{with_gcc9}
+. /opt/rh/devtoolset-9/enable
+%endif
+
 %setup -q -n %{name}-%{version} -c
 %{__mv} linux-%{LKAver} linux-%{version}-%{release}.%{_target_cpu}
 mkdir %{AUFSver}
@@ -283,11 +294,21 @@ patch -p 1 < ../%{AUFSver}/aufs5-kbuild.patch
 patch -p 1 < ../%{AUFSver}/aufs5-base.patch
 patch -p 1 < ../%{AUFSver}/aufs5-mmap.patch
 
+# Purge the source tree of all unrequired dot-files.
+%{_bindir}/find -name '.[a-z]*' | %{_bindir}/xargs --no-run-if-empty %{__rm} -rf
+
 %{__cp} %{SOURCE1} .
+
+# Dirty hack
+%{__make} -s ARCH=%{buildarch} olddefconfig
 
 popd > /dev/null
 
 %build
+%if %{with_gcc9}
+. /opt/rh/devtoolset-9/enable
+%endif
+
 BuildKernel() {
     Flavour=$1
 
@@ -300,16 +321,16 @@ BuildKernel() {
         %{__cp} config-%{version}-%{_target_cpu}-${Flavour} .config
     fi
 
-    # Dirty hack
-    %{__make} olddefconfig
-
     %define KVRFA %{version}-%{release}${Flavour}.%{_target_cpu}
 
-    # Set the EXTRAVERSION string in the main Makefile.
-    %{__perl} -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -%{release}${Flavour}.%{_target_cpu}/" Makefile
+    # Set the EXTRAVERSION string in the top level Makefile.
+    %{__sed} -i "s/^EXTRAVERSION.*/EXTRAVERSION = -%{release}${Flavour}.%{_target_cpu}/" Makefile
+
 
     %{__make} -s ARCH=%{buildarch} oldconfig
+
     %{__make} -s ARCH=%{buildarch} %{?_smp_mflags} bzImage
+
     %{__make} -s ARCH=%{buildarch} %{?_smp_mflags} modules
 
     # Install the results into the RPM_BUILD_ROOT directory.
@@ -332,8 +353,8 @@ BuildKernel() {
 
 %ifarch %{vdso_arches}
     %{__make} -s ARCH=%{buildarch} INSTALL_MOD_PATH=$RPM_BUILD_ROOT KERNELRELEASE=%{KVRFA} vdso_install
-    /usr/bin/find $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/vdso -type f -name 'vdso*.so' | xargs --no-run-if-empty %{__strip}
-    if grep -q '^CONFIG_XEN=y$' .config; then
+    %{_bindir}/find $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/vdso -type f -name 'vdso*.so' | %{_bindir}/xargs --no-run-if-empty %{__strip}
+    if %{_bindir}/grep -q '^CONFIG_XEN=y$' .config; then
         echo > ldconfig-%{name}.conf "\
 # This directive teaches ldconfig to search in nosegneg subdirectories
 # and cache the DSOs there with extra bit 1 set in their hwcap match
@@ -354,7 +375,7 @@ hwcap 1 nosegneg"
     # This looks scary but the end result is supposed to be:
     #
     # - all arch relevant include/ files
-    # - all Makefile & Kconfig files
+    # - all Makefile and Kconfig files
     # - all script/ files
     #
     %{__rm} -f $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build
@@ -368,7 +389,7 @@ hwcap 1 nosegneg"
     %{__mkdir_p} $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/weak-updates
 
     # First copy everything . . .
-    %{__cp} --parents `/usr/bin/find  -type f -name 'Makefile*' -o -name 'Kconfig*'` $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build
+    %{__cp} --parents `%{_bindir}/find  -type f -name 'Makefile*' -o -name 'Kconfig*'` $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build
     %{__cp} Module.symvers $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build
     %{__cp} System.map $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build
     if [ -s Module.markers ]; then
@@ -377,7 +398,7 @@ hwcap 1 nosegneg"
 
     %{__gzip} -c9 < Module.symvers > $RPM_BUILD_ROOT/boot/symvers-%{KVRFA}.gz
 
-    # . . . then drop all but the needed Makefiles & Kconfig files.
+    # . . . then drop all but the needed Makefiles and Kconfig files.
     %{__rm} -rf $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Documentation
     %{__rm} -rf $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/scripts
     %{__rm} -rf $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include
@@ -403,7 +424,7 @@ hwcap 1 nosegneg"
     popd > /dev/null
     %{__rm} -f $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include/Kbuild
     # Ensure that objtool is present if CONFIG_STACK_VALIDATION is set.
-    if grep -q '^CONFIG_STACK_VALIDATION=y$' .config; then
+    if %{_bindir}/grep -q '^CONFIG_STACK_VALIDATION=y$' .config; then
         %{__mkdir_p} $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/tools/objtool
         %{__cp} -a tools/objtool/objtool $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/tools/objtool
     fi
@@ -413,22 +434,23 @@ hwcap 1 nosegneg"
     %{__cp} $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/.config $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include/config/auto.conf
     # Now ensure that the Makefile, .config, auto.conf, autoconf.h and version.h files
     # all have matching timestamps so that external modules can be built.
-    touch -r $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Makefile $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/.config
-    touch -r $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Makefile $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include/config/auto.conf
-    touch -r $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Makefile $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include/linux/autoconf.h
-    touch -r $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Makefile $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include/generated/autoconf.h
-    touch -r $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Makefile $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include/generated/uapi/linux/version.h
+    %{_bindir}/touch -r $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Makefile $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/.config
+    %{_bindir}/touch -r $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Makefile $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include/config/auto.conf
+    %{_bindir}/touch -r $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Makefile $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include/linux/autoconf.h
+    %{_bindir}/touch -r $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Makefile $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include/generated/autoconf.h
+    %{_bindir}/touch -r $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/Makefile $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build/include/generated/uapi/linux/version.h
 
     # Remove any 'left-over' .cmd files.
-    /usr/bin/find $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build -type f -name '*.cmd' | xargs --no-run-if-empty %{__rm} -f
+    %{_bindir}/find $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build -type f -name '*.cmd' | %{_bindir}/xargs --no-run-if-empty %{__rm} -f
 
-    /usr/bin/find $RPM_BUILD_ROOT/lib/modules/%{KVRFA} -type f -name '*.ko' > modnames
+    %{_bindir}/find $RPM_BUILD_ROOT/lib/modules/%{KVRFA} -type f -name '*.ko' > modnames
 
     # Mark the modules executable, so that strip-to-file can strip them.
-    xargs --no-run-if-empty %{__chmod} u+x < modnames
+    %{_bindir}/xargs --no-run-if-empty %{__chmod} u+x < modnames
 
     # Generate a list of modules for block and networking.
-    grep -F /drivers/ modnames | xargs --no-run-if-empty nm -upA | sed -n 's,^.*/\([^/]*\.ko\):  *U \(.*\)$,\1 \2,p' > drivers.undef
+    %{_bindir}/grep -F /drivers/ modnames | %{_bindir}/xargs --no-run-if-empty nm -upA \
+        | sed -n 's,^.*/\([^/]*\.ko\):  *U \(.*\)$,\1 \2,p' > drivers.undef
 
     collect_modules_list()
     {
@@ -459,7 +481,7 @@ hwcap 1 nosegneg"
         %{_sbindir}/modinfo -l $i >> modinfo
     done < modnames
 
-    grep -E -v 'GPL( v2)?$|Dual BSD/GPL$|Dual MPL/GPL$|GPL and additional rights$' modinfo && exit 1
+    %{_bindir}/grep -E -v 'GPL( v2)?$|Dual BSD/GPL$|Dual MPL/GPL$|GPL and additional rights$' modinfo && exit 1
 
     %{__rm} -f modinfo modnames
 
@@ -472,7 +494,7 @@ hwcap 1 nosegneg"
     # Move the development files out of the /lib/modules/ file system.
     %{__mkdir_p} $RPM_BUILD_ROOT/usr/src/kernels
     %{__mv} $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build $RPM_BUILD_ROOT/usr/src/kernels/%{KVRFA}
-    %{__ln_s} -f /usr/src/kernels/%{KVRFA} $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build
+    %{__ln_s} -f %{_usrsrc}/kernels/%{KVRFA} $RPM_BUILD_ROOT/lib/modules/%{KVRFA}/build
 }
 
 # Prepare the directories.
@@ -488,7 +510,7 @@ BuildKernel
 
 %if %{with_perf}
 %global perf_make \
-    %{__make} -s -C tools/perf %{?_smp_mflags} prefix=%{_prefix} lib=%{_lib} WERROR=0 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_LIBBABELTRACE=1 NO_LIBUNWIND=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 NO_STRLCPY=1
+    %{__make} -s -C tools/perf %{?_smp_mflags} prefix=%{_prefix} lib=%{_lib} WERROR=0 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_LIBBABELTRACE=1 NO_LIBUNWIND=1 NO_LIBZSTD=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 NO_STRLCPY=1
 
 %{perf_make} all
 %{perf_make} man
@@ -520,6 +542,10 @@ popd > /dev/null
 popd > /dev/null
 
 %install
+%if %{with_gcc9}
+. /opt/rh/devtoolset-9/enable
+%endif
+
 pushd linux-%{version}-%{release}.%{_target_cpu} > /dev/null
 
 %if %{with_headers}
@@ -532,16 +558,16 @@ pushd linux-%{version}-%{release}.%{_target_cpu} > /dev/null
 
 # Do headers_check but don't die if it fails.
 %{__make} -s ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr headers_check > hdrwarnings.txt || :
-if grep -q 'exist' hdrwarnings.txt; then
+if %{_bindir}/grep -q 'exist' hdrwarnings.txt; then
     sed s:^$RPM_BUILD_ROOT/usr/include/:: hdrwarnings.txt
     # Temporarily cause a build failure if header inconsistencies.
     # exit 1
 fi
 
 # Remove the unrequired files.
-/usr/bin/find $RPM_BUILD_ROOT/usr/include -type f \
+%{_bindir}/find $RPM_BUILD_ROOT/usr/include -type f \
     \( -name .install -o -name .check -o -name ..install.cmd -o -name ..check.cmd \) | \
-    xargs --no-run-if-empty %{__rm} -f
+    %{_bindir}/xargs --no-run-if-empty %{__rm} -f
 %endif
 
 %if %{with_doc}
@@ -552,7 +578,7 @@ DOCDIR=$RPM_BUILD_ROOT%{_datadir}/doc/%{name}-doc-%{version}
 
 # Copy the documentation over.
 %{__mkdir_p} $DOCDIR
-%{__tar} -f - --exclude=man --exclude='.*' -c Documentation | %{__tar} xf - -C $DOCDIR
+%{__tar} -f - --exclude=man --exclude='.*' -c Documentation | %{__tar} -xf - -C $DOCDIR
 %endif
 
 %if %{with_perf}
@@ -588,8 +614,7 @@ popd > /dev/null
 pushd tools/power/x86/turbostat > /dev/null
 %{__make} -s DESTDIR=%{buildroot} install
 popd > /dev/null
-/usr/bin/find %{buildroot}%{_mandir} -type f -print0 \
-    | xargs -0 --no-run-if-empty %{__chmod} 644
+%{_bindir}/find %{buildroot}%{_mandir} -type f -print0 | %{_bindir}/xargs -0 --no-run-if-empty %{__chmod} 644
 %endif
 pushd tools/thermal/tmon > /dev/null
 %{__install} -m755 tmon %{buildroot}%{_bindir}/tmon
@@ -603,6 +628,12 @@ popd > /dev/null
 
 # Scripts section.
 %if %{with_default}
+%triggerin -- microcode_ctl
+KVERSION=%{version}-%{release}.%{_target_cpu}
+if [ -e "/lib/modules/$KVERSION/modules.dep" ]; then
+     %{_bindir}/dracut -f --kver $KVERSION
+fi
+
 %posttrans
 %{_sbindir}/new-kernel-pkg --package %{name} --mkinitrd --dracut --depmod --update %{version}-%{release}.%{_target_cpu} || exit $?
 %{_sbindir}/new-kernel-pkg --package %{name} --rpmposttrans %{version}-%{release}.%{_target_cpu} || exit $?
@@ -631,10 +662,10 @@ done
 if [ -f /etc/sysconfig/kernel ]; then
     . /etc/sysconfig/kernel || exit $?
 fi
-if [ "$HARDLINK" != "no" -a -x /usr/sbin/hardlink ]; then
-    pushd /usr/src/kernels/%{version}-%{release}.%{_target_cpu} > /dev/null
-    /usr/bin/find . -type f | while read f; do
-        /usr/sbin/hardlink -c /usr/src/kernels/*.fc*.*/$f $f
+if [ "$HARDLINK" != "no" -a -x %{_sbindir}/hardlink ]; then
+    pushd %{_usrsrc}/kernels/%{version}-%{release}.%{_target_cpu} > /dev/null
+    %{_bindir}/find . -type f | while read f; do
+        %{_sbindir}/hardlink -c %{_usrsrc}/kernels/*.fc*.*/$f $f
     done
     popd > /dev/null
 fi
@@ -672,8 +703,8 @@ fi
 
 %files devel
 %defattr(-,root,root)
-%dir /usr/src/kernels
-/usr/src/kernels/%{version}-%{release}.%{_target_cpu}
+%dir %{_usrsrc}/kernels
+%{_usrsrc}/kernels/%{version}-%{release}.%{_target_cpu}
 %endif
 
 %if %{with_headers}
@@ -749,6 +780,769 @@ fi
 %endif
 
 %changelog
+* Wed Sep 23 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.11-1
+- Updated with the 5.8.11 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.11]
+
+* Thu Sep 17 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.10-1
+- Updated with the 5.8.10 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.10]
+
+* Sat Sep 12 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.9-1
+- Updated with the 5.8.9 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.9]
+
+* Wed Sep 09 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.8-1
+- Updated with the 5.8.8 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.8]
+
+* Sun Sep 06 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.7-1
+- Updated with the 5.8.7 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.7]
+- CONFIG_IEEE802154_HWSIM=m
+- [http://lists.elrepo.org/pipermail/elrepo/2020-September/005375.html]
+
+* Fri Sep 04 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.6-1
+- Updated with the 5.8.6 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.6]
+
+* Fri Aug 28 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.5-1
+- Updated with the 5.8.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.5]
+
+* Wed Aug 26 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.4-1
+- Updated with the 5.8.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.4]
+
+* Sat Aug 22 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.3-1
+- Updated with the 5.8.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.3]
+
+* Wed Aug 19 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.2-1
+- Updated with the 5.8.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.2]
+
+* Tue Aug 11 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.1-1
+- Updated with the 5.8.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.8.1]
+- CONFIG_USB4_NET=m and CONFIG_USB4=m
+- [https://elrepo.org/bugs/view.php?id=1029]
+
+* Sun Aug 02 2020 Alan Bartlett <ajb@elrepo.org> - 5.8.0-1
+- Updated with the 5.8 source tarball.
+- CONFIG_CC_VERSION_TEXT="gcc (GCC) 9.3.1 20200408 (Red Hat 9.3.1-2)",
+- CONFIG_DEFAULT_INIT="", CONFIG_TASKS_RCU_GENERIC=y,
+- CONFIG_TASKS_RUDE_RCU=y, CONFIG_HIBERNATION_SNAPSHOT_DEV=y,
+- CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER=y,
+- CONFIG_AS_TPAUSE=y, CONFIG_XFRM_AH=m, CONFIG_XFRM_ESP=m,
+- CONFIG_NET_ACT_GATE=m, CONFIG_BCM54140_PHY=m, CONFIG_MT7603E=m,
+- CONFIG_MT7615_COMMON=m, CONFIG_MT7663U=m, CONFIG_MT7915E=m,
+- CONFIG_RTW88_8822B=m, CONFIG_RTW88_8822C=m, CONFIG_RTW88_8723D=m,
+- CONFIG_RTW88_8822BE=m, CONFIG_RTW88_8822CE=m, CONFIG_RTW88_8723DE=m,
+- CONFIG_TOUCHSCREEN_CY8CTMA140=m, CONFIG_PINCTRL_MCP23S08_I2C=m,
+- CONFIG_PINCTRL_MCP23S08_SPI=m, CONFIG_PINCTRL_JASPERLAKE=m,
+- CONFIG_SENSORS_AMD_ENERGY=m, CONFIG_SENSORS_MAX16601=m,
+- CONFIG_REGULATOR_MAX77826=m, CONFIG_CEC_SECO=m,
+- CONFIG_MEDIA_SUPPORT_FILTER=y, CONFIG_VIDEO_V4L2_SUBDEV_API=y,
+- CONFIG_VIDEO_IPU3_CIO2=m, CONFIG_VIDEO_TDA1997X=m,
+- CONFIG_VIDEO_TLV320AIC23B=m, CONFIG_VIDEO_ADV7180=m,
+- CONFIG_VIDEO_ADV7183=m, CONFIG_VIDEO_ADV7604=m,
+- CONFIG_VIDEO_ADV7604_CEC=y, CONFIG_VIDEO_ADV7842=m,
+- CONFIG_VIDEO_ADV7842_CEC=y, CONFIG_VIDEO_BT819=m,
+- CONFIG_VIDEO_BT856=m, CONFIG_VIDEO_BT866=m,
+- CONFIG_VIDEO_KS0127=m, CONFIG_VIDEO_ML86V7667=m,
+- CONFIG_VIDEO_SAA7110=m, CONFIG_VIDEO_TC358743=m,
+- CONFIG_VIDEO_TC358743_CEC=y, CONFIG_VIDEO_TVP514X=m,
+- CONFIG_VIDEO_TVP7002=m, CONFIG_VIDEO_TW9910=m,
+- CONFIG_VIDEO_VPX3220=m, CONFIG_DRM_I915_FENCE_TIMEOUT=10000,
+- CONFIG_SND_SOC_AMD_RENOIR=m, CONFIG_SND_SOC_AMD_RENOIR_MACH=m,
+- CONFIG_SND_SOC_FSL_EASRC=m, CONFIG_SND_SOC_MAX98390=m,
+- CONFIG_SND_SOC_ZL38060=m, CONFIG_USB_CHIPIDEA_MSM=m,
+- CONFIG_USB_CHIPIDEA_GENERIC=m, CONFIG_INFINIBAND_RTRS=m,
+- CONFIG_INFINIBAND_RTRS_CLIENT=m, CONFIG_INFINIBAND_RTRS_SERVER=m,
+- CONFIG_VIRTIO_MEM=m, CONFIG_INTEL_WMI_SBL_FW_UPDATE=m,
+- CONFIG_F2FS_FS_LZORLE=y, CONFIG_LINEAR_RANGES=y,
+- CONFIG_ARCH_USE_SYM_ANNOTATIONS=y, CONFIG_DYNAMIC_DEBUG_CORE=y,
+- CONFIG_ARCH_HAS_EARLY_DEBUG=y, CONFIG_ARCH_HAS_DEBUG_WX=y,
+- CONFIG_ARCH_HAS_DEBUG_VM_PGTABLE=y,
+- CONFIG_CC_HAS_WORKING_NOSANITIZE_ADDRESS=y and CONFIG_HAVE_ARCH_KCSAN=y
+
+* Fri Jul 31 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.12-1
+- Updated with the 5.7.12 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.12]
+
+* Wed Jul 29 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.11-1
+- Updated with the 5.7.11 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.11]
+
+* Wed Jul 22 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.10-1
+- Updated with the 5.7.10 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.10]
+- Enhanced the specification file to allow the kernel-lt-aufs
+- package set to be built, using an updated gcc version from
+- the Red Hat devtoolset-9 package, following an upstream
+- increase in the minimum gcc version requirement.
+- [https://elrepo.org/bugs/view.php?id=1023]
+
+* Thu Jul 16 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.9-1
+- Updated with the 5.7.9 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.9]
+- CONFIG_USBIP_CORE=m, CONFIG_USBIP_VHCI_HCD=m,
+- CONFIG_USBIP_VHCI_HC_PORTS=8, CONFIG_USBIP_VHCI_NR_HCS=1,
+- CONFIG_USBIP_HOST=m and CONFIG_USBIP_VUDC=m
+- [https://elrepo.org/bugs/view.php?id=1019]
+
+* Wed Jul 08 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.8-1
+- Updated with the 5.7.8 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.8]
+- CONFIG_NILFS2_FS=m, CONFIG_F2FS_FS_SECURITY=y,
+- CONFIG_F2FS_FS_COMPRESSION=y, CONFIG_F2FS_FS_LZO=y,
+- CONFIG_F2FS_FS_LZ4=y, CONFIG_F2FS_FS_ZSTD=y, CONFIG_ZONEFS_FS=m,
+- CONFIG_LZ4_COMPRESS=y, CONFIG_ZSTD_COMPRESS=y and
+- CONFIG_ZSTD_DECOMPRESS=y
+- [https://elrepo.org/bugs/view.php?id=1018]
+
+* Wed Jul 01 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.7-1
+- Updated with the 5.7.7 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.7]
+- Added a triggerin scriptlet to rebuild the initramfs image
+- when the system microcode package is updated.
+- [https://elrepo.org/bugs/view.php?id=1012]
+
+* Thu Jun 25 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.6-1
+- Updated with the 5.7.6 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.6]
+
+* Mon Jun 22 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.5-1
+- Updated with the 5.7.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.5]
+
+* Thu Jun 18 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.4-1
+- Updated with the 5.7.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.4]
+
+* Wed Jun 17 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.3-1
+- Updated with the 5.7.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.3]
+
+* Thu Jun 11 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.2-1
+- Updated with the 5.7.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.2]
+
+* Sat Jun 06 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.1-1
+- Updated with the 5.7.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.7.1]
+
+* Sun May 31 2020 Alan Bartlett <ajb@elrepo.org> - 5.7.0-1
+- Updated with the 5.7 source tarball.
+- CONFIG_LD_VERSION=227000000, CONFIG_HARDIRQS_SW_RESEND=y,
+- CONFIG_HAVE_ARCH_USERFAULTFD_WP=y, CONFIG_AS_AVX512=y,
+- CONFIG_AS_SHA1_NI=y, CONFIG_AS_SHA256_NI=y,
+- CONFIG_NUMA_KEEP_MEMINFO=y, CONFIG_PAGE_REPORTING=y,
+- CONFIG_ZSWAP_COMPRESSOR_DEFAULT_LZO=y,
+- CONFIG_ZSWAP_COMPRESSOR_DEFAULT="lzo",
+- CONFIG_ZSWAP_ZPOOL_DEFAULT_ZBUD=y,
+- CONFIG_ZSWAP_ZPOOL_DEFAULT="zbud",
+- CONFIG_SATA_HOST=y, CONFIG_PATA_TIMINGS=y, CONFIG_ATA_FORCE=y,
+- CONFIG_BAREUDP=m, CONFIG_DWMAC_INTEL=m, CONFIG_MDIO_XPCS=m,
+- CONFIG_SERIAL_SPRD=m, CONFIG_SENSORS_AXI_FAN_CONTROL=m,
+- CONFIG_SENSORS_W83795_FANCTRL=y,
+- CONFIG_DRM_I915_MAX_REQUEST_BUSYWAIT=8000,
+- CONFIG_TINYDRM_ILI9486=m, CONFIG_SND_BCM63XX_I2S_WHISTLER=m,
+- CONFIG_SND_SOC_TLV320ADCX140=m, CONFIG_APPLE_MFI_FASTCHARGE=m,
+- CONFIG_MMC_HSQ=m, CONFIG_VIRTIO_VDPA=m, CONFIG_VDPA=m,
+- CONFIG_IFCVF=m, CONFIG_VHOST_IOTLB=m, CONFIG_VHOST_DPN=y,
+- CONFIG_VHOST_MENU=y, CONFIG_VHOST_VDPA=m,
+- CONFIG_SURFACE_3_POWER_OPREGION=m, CONFIG_AL3010=m,
+- CONFIG_EXFAT_FS=m, CONFIG_EXFAT_DEFAULT_IOCHARSET="utf8" and
+- CONFIG_MAGIC_SYSRQ_SERIAL_SEQUENCE=""
+
+* Wed May 27 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.15-1
+- Updated with the 5.6.15 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.15]
+
+* Wed May 20 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.14-1
+- Updated with the 5.6.14 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.14]
+
+* Thu May 14 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.13-1
+- Updated with the 5.6.13 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.13]
+
+* Sun May 10 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.12-1
+- Updated with the 5.6.12 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.12]
+
+* Wed May 06 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.11-1
+- Updated with the 5.6.11 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.11]
+
+* Sat May 02 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.10-1
+- Updated with the 5.6.10 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.10]
+
+* Sat May 02 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.9-1
+- Updated with the 5.6.9 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.9]
+
+* Wed Apr 29 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.8-1
+- Updated with the 5.6.8 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.8]
+
+* Thu Apr 23 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.7-1
+- Updated with the 5.6.7 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.7]
+
+* Wed Apr 22 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.6-1
+- Updated with the 5.6.6 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.6]
+
+* Fri Apr 17 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.5-1
+- Updated with the 5.6.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.5]
+- CONFIG_SND_SOC_FSL_ASRC=m, CONFIG_SND_SOC_FSL_SAI=m,
+- CONFIG_SND_SOC_FSL_MQS=m, CONFIG_SND_SOC_FSL_AUDMIX=m,
+- CONFIG_SND_SOC_FSL_SSI=m, CONFIG_SND_SOC_FSL_SPDIF=m,
+- CONFIG_SND_SOC_FSL_ESAI=m, CONFIG_SND_SOC_FSL_MICFIL=m,
+- CONFIG_SND_SOC_IMX_AUDMUX=m, CONFIG_SND_SOC_MTK_BTCVSD=m,
+- CONFIG_SND_SOC_XILINX_AUDIO_FORMATTER=m and
+- CONFIG_SND_SOC_XILINX_SPDIF=m
+
+* Sun Apr 12 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.4-1
+- Updated with the 5.6.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.4]
+
+* Wed Apr 08 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.3-1
+- Updated with the 5.6.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.3]
+
+* Thu Apr 02 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.2-1
+- Updated with the 5.6.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.2]
+
+* Wed Apr 01 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.1-1
+- Updated with the 5.6.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.6.1]
+
+* Sun Mar 29 2020 Alan Bartlett <ajb@elrepo.org> - 5.6.0-1
+- Updated with the 5.6 source tarball.
+- CONFIG_BUILDTIME_TABLE_SORT=y, CONFIG_TIME_NS=y,
+- CONFIG_ARCH_WANT_DEFAULT_BPF_JIT=y, CONFIG_BPF_JIT_DEFAULT_ON=y,
+- CONFIG_IA32_FEAT_CTL=y, CONFIG_X86_VMX_FEATURE_NAMES=y,
+- CONFIG_MMU_GATHER_TABLE_FREE=y, CONFIG_MMU_GATHER_RCU_TABLE_FREE=y,
+- CONFIG_BLK_DEV_INTEGRITY_T10=m, CONFIG_NET_SCH_FQ_PIE=m,
+- CONFIG_NET_SCH_ETS=m, CONFIG_VSOCKETS_LOOPBACK=m,
+- CONFIG_ETHTOOL_NETLINK=y, CONFIG_WIREGUARD=m, CONFIG_BCM84881_PHY=y,
+- CONFIG_ISDN_CAPI=y, CONFIG_CAPI_TRACE=y, CONFIG_PINCTRL_LYNXPOINT=m,
+- CONFIG_SENSORS_ADM1177=m, CONFIG_SENSORS_DRIVETEMP=m,
+- CONFIG_SENSORS_MAX31730=m, CONFIG_SENSORS_MAX20730=m,
+- CONFIG_SENSORS_XDPE122=m, CONFIG_REGULATOR_MP8859=m,
+- CONFIG_DRM_AMD_DC_DCN=y, CONFIG_SND_PCSP=m, CONFIG_SND_DUMMY=m,
+- CONFIG_SND_HDA_PREALLOC_SIZE=0, CONFIG_SND_SOC_INTEL_BDW_RT5650_MACH=m,
+- CONFIG_SND_SOC_MT6660=m, CONFIG_LEDS_TPS6105X=m, CONFIG_INTEL_IDXD=m,
+- CONFIG_PLX_DMA=m, CONFIG_IOASID=y, CONFIG_PHY_INTEL_EMMC=m,
+- CONFIG_NFS_DISABLE_UDP_SUPPORT=y, CONFIG_SECURITY_SELINUX_SIDTAB_HASH_BITS=9,
+- CONFIG_SECURITY_SELINUX_SID2STR_CACHE_SIZE=256,
+- CONFIG_IMA_MEASURE_ASYMMETRIC_KEYS=y, CONFIG_IMA_QUEUE_EARLY_BOOT_KEYS=y,
+- CONFIG_CRYPTO_LIB_POLY1305_RSIZE=11, CONFIG_GENERIC_VDSO_TIME_NS=y and
+- CONFIG_GENERIC_PTDUMP=y
+
+* Wed Mar 25 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.13-1
+- Updated with the 5.5.13 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.13]
+
+* Wed Mar 25 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.12-1
+- Updated with the 5.5.12 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.12]
+
+* Sun Mar 22 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.11-1
+- Updated with the 5.5.11 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.11]
+
+* Wed Mar 18 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.10-1
+- Updated with the 5.5.10 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.10]
+
+* Thu Mar 12 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.9-1
+- Updated with the 5.5.9 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.9]
+
+* Wed Mar 04 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.8-1
+- Updated with the 5.5.8 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.8]
+
+* Fri Feb 28 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.7-1
+- Updated with the 5.5.7 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.7]
+
+* Sun Feb 23 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.6-1
+- Updated with the 5.5.6 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.6]
+
+* Wed Feb 19 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.5-1
+- Updated with the 5.5.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.5]
+
+* Fri Feb 14 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.4-1
+- Updated with the 5.5.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.4]
+
+* Tue Feb 11 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.3-1
+- Updated with the 5.5.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.3]
+
+* Tue Feb 04 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.2-1
+- Updated with the 5.5.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.2]
+
+* Fri Jan 31 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.1-1
+- Updated with the 5.5.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.5.1]
+
+* Sun Jan 26 2020 Alan Bartlett <ajb@elrepo.org> - 5.5.0-1
+- Updated with the 5.5 source tarball.
+- CONFIG_IRQ_MSI_IOMMU=y, CONFIG_CC_HAS_INT128=y,
+- CONFIG_X86_IOPL_IOPERM=y, CONFIG_X86_UMIP=y,
+- CONFIG_BLK_CGROUP_RWSTAT=y, CONFIG_MAPPING_DIRTY_HELPERS=y,
+- CONFIG_FW_CACHE=y, CONFIG_NVME_HWMON=y, CONFIG_DP83869_PHY=m,
+- CONFIG_PINCTRL_TIGERLAKE=m, CONFIG_SENSORS_LTC2947=m,
+- CONFIG_SENSORS_LTC2947_I2C=m, CONFIG_SENSORS_LTC2947_SPI=m,
+- CONFIG_SENSORS_BEL_PFE=m, CONFIG_SENSORS_TMP513=m,
+- CONFIG_DRM_TTM_DMA_PAGE_POOL=y, CONFIG_DRM_TTM_HELPER=m,
+- CONFIG_DRM_I915_HEARTBEAT_INTERVAL=2500,
+- CONFIG_DRM_I915_PREEMPT_TIMEOUT=640,
+- CONFIG_DRM_I915_STOP_TIMEOUT=100,
+- CONFIG_DRM_I915_TIMESLICE_DURATION=1,
+- CONFIG_BACKLIGHT_QCOM_WLED=m, CONFIG_SND_INTEL_NHLT=y,
+- CONFIG_SND_INTEL_DSP_CONFIG=m,
+- CONFIG_SND_SOC_INTEL_BXT_DA7219_MAX98357A_COMMON=m,
+- CONFIG_SND_SOC_ADAU7118=m, CONFIG_SND_SOC_ADAU7118_HW=m,
+- CONFIG_SND_SOC_ADAU7118_I2C=m, CONFIG_SND_SOC_TAS2562=m,
+- CONFIG_SND_SOC_TAS2770=m, CONFIG_SF_PDMA=m,
+- CONFIG_SYSTEM76_ACPI=m, CONFIG_IOMMU_DMA=y, CONFIG_IO_WQ=y,
+- CONFIG_CRYPTO_SKCIPHER=y, CONFIG_CRYPTO_SKCIPHER2=y,
+- CONFIG_CRYPTO_CURVE25519=m, CONFIG_CRYPTO_CURVE25519_X86=m,
+- CONFIG_CRYPTO_BLAKE2B=m, CONFIG_CRYPTO_BLAKE2S=m,
+- CONFIG_CRYPTO_BLAKE2S_X86=m, CONFIG_CRYPTO_ARCH_HAVE_LIB_BLAKE2S=m,
+- CONFIG_CRYPTO_LIB_BLAKE2S_GENERIC=m, CONFIG_CRYPTO_LIB_BLAKE2S=m,
+- CONFIG_CRYPTO_ARCH_HAVE_LIB_CHACHA=m,
+- CONFIG_CRYPTO_LIB_CHACHA_GENERIC=m, CONFIG_CRYPTO_LIB_CHACHA=m,
+- CONFIG_CRYPTO_ARCH_HAVE_LIB_CURVE25519=m,
+- CONFIG_CRYPTO_LIB_CURVE25519_GENERIC=m,
+- CONFIG_CRYPTO_LIB_CURVE25519=m, CONFIG_CRYPTO_LIB_POLY1305_RSIZE=4,
+- CONFIG_CRYPTO_ARCH_HAVE_LIB_POLY1305=m,
+- CONFIG_CRYPTO_LIB_POLY1305_GENERIC=m, CONFIG_CRYPTO_LIB_POLY1305=m,
+- CONFIG_CRYPTO_LIB_CHACHA20POLY1305=m,
+- CONFIG_CRYPTO_DEV_AMLOGIC_GXL=m, CONFIG_MEMREGION=y,
+- CONFIG_SYMBOLIC_ERRNAME=y, CONFIG_HAVE_ARCH_KASAN_VMALLOC=y,
+- CONFIG_HAVE_DYNAMIC_FTRACE_WITH_DIRECT_CALLS=y and
+- CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS=y
+
+* Sun Jan 26 2020 Alan Bartlett <ajb@elrepo.org> - 5.4.15-1
+- Updated with the 5.4.15 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.15]
+
+* Thu Jan 23 2020 Alan Bartlett <ajb@elrepo.org> - 5.4.14-1
+- Updated with the 5.4.14 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.14]
+
+* Fri Jan 17 2020 Alan Bartlett <ajb@elrepo.org> - 5.4.13-1
+- Updated with the 5.4.13 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.13]
+
+* Tue Jan 14 2020 Alan Bartlett <ajb@elrepo.org> - 5.4.12-1
+- Updated with the 5.4.12 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.12]
+
+* Sun Jan 12 2020 Alan Bartlett <ajb@elrepo.org> - 5.4.11-1
+- Updated with the 5.4.11 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.11]
+
+* Thu Jan 09 2020 Alan Bartlett <ajb@elrepo.org> - 5.4.10-1
+- Updated with the 5.4.10 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.10]
+
+* Thu Jan 09 2020 Alan Bartlett <ajb@elrepo.org> - 5.4.9-1
+- Updated with the 5.4.9 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.9]
+- Not released due to a patch being missing from the upstream
+- stable tree. [https://lkml.org/lkml/2020/1/9/363]
+
+* Sat Jan 04 2020 Alan Bartlett <ajb@elrepo.org> - 5.4.8-1
+- Updated with the 5.4.8 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.8]
+
+* Tue Dec 31 2019 Alan Bartlett <ajb@elrepo.org> - 5.4.7-1
+- Updated with the 5.4.7 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.7]
+
+* Sat Dec 21 2019 Alan Bartlett <ajb@elrepo.org> - 5.4.6-1
+- Updated with the 5.4.6 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.6]
+
+* Wed Dec 18 2019 Alan Bartlett <ajb@elrepo.org> - 5.4.5-1
+- Updated with the 5.4.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.5]
+
+* Tue Dec 17 2019 Alan Bartlett <ajb@elrepo.org> - 5.4.4-1
+- Updated with the 5.4.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.4]
+
+* Fri Dec 13 2019 Alan Bartlett <ajb@elrepo.org> - 5.4.3-1
+- Updated with the 5.4.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.3]
+
+* Wed Dec 04 2019 Alan Bartlett <ajb@elrepo.org> - 5.4.2-1
+- Updated with the 5.4.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.2]
+
+* Fri Nov 29 2019 Alan Bartlett <ajb@elrepo.org> - 5.4.1-1
+- Updated with the 5.4.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.1]
+- CONFIG_AF_RXRPC=m, CONFIG_AF_RXRPC_IPV6=y,
+- CONFIG_AF_RXRPC_DEBUG=y, CONFIG_RXKAD=y, CONFIG_AFS_FS=m,
+- CONFIG_AFS_DEBUG=y, CONFIG_AFS_FSCACHE=y
+- and CONFIG_AFS_DEBUG_CURSOR=y
+- [https://elrepo.org/bugs/view.php?id=969]
+- CONFIG_DM_CLONE=m
+- [https://elrepo.org/bugs/view.php?id=970]
+- CONFIG_DRM_RADEON_USERPTR=y
+- [https://elrepo.org/bugs/view.php?id=972]
+
+* Mon Nov 25 2019 Alan Bartlett <ajb@elrepo.org> - 5.4.0-1
+- Updated with the 5.4 source tarball.
+- CONFIG_ARCH_CPUIDLE_HALTPOLL=y, CONFIG_HALTPOLL_CPUIDLE=y,
+- CONFIG_HAVE_ASM_MODVERSIONS=y, CONFIG_ASM_MODVERSIONS=y,
+- CONFIG_HMM_MIRROR=y, CONFIG_NET_TC_SKB_EXT=y,
+- CONFIG_CAN_J1939=m, CONFIG_CAN_KVASER_PCIEFD=m,
+- CONFIG_CAN_M_CAN_PLATFORM=m, CONFIG_CAN_M_CAN_TCAN4X5X=m,
+- CONFIG_CAN_F81601=m, CONFIG_PCI_HYPERV_INTERFACE=m,
+- CONFIG_NET_VENDOR_PENSANDO=y, CONFIG_IONIC=m, CONFIG_ADIN_PHY=m,
+- CONFIG_ATH9K_PCI_NO_EEPROM=m, CONFIG_JOYSTICK_FSIA6B=m,
+- CONFIG_SERIAL_8250_DWLIB=y, CONFIG_SERIAL_FSL_LINFLEXUART=m,
+- CONFIG_SPI_MEM=y, CONFIG_SENSORS_AS370=m,
+- CONFIG_SENSORS_INSPUR_IPSPS=m, CONFIG_VIDEO_V4L2_I2C=y,
+- CONFIG_DRM_MIPI_DBI=m, CONFIG_DRM_GEM_CMA_HELPER=y,
+- CONFIG_DRM_KMS_CMA_HELPER=y, CONFIG_DRM_AMDGPU_USERPTR=y,
+- CONFIG_DRM_AMD_DC_DCN2_1=y, CONFIG_TINYDRM_HX8357D=m,
+- CONFIG_TINYDRM_ILI9225=m, CONFIG_TINYDRM_ILI9341=m,
+- CONFIG_TINYDRM_MI0283QT=m, CONFIG_TINYDRM_REPAPER=m,
+- CONFIG_TINYDRM_ST7586=m, CONFIG_TINYDRM_ST7735R=m,
+- CONFIG_SND_INTEL_NHLT=m,
+- CONFIG_SND_SOC_INTEL_DA7219_MAX98357A_GENERIC=m,
+- CONFIG_SND_SOC_UDA1334=m, CONFIG_USB_ROLE_SWITCH=m,
+- CONFIG_MMC_SDHCI_IO_ACCESSORS=y, CONFIG_VIRTIO_FS=m,
+- CONFIG_CRYPTO_ESSIV=m, CONFIG_CRYPTO_LIB_SHA256=y,
+- CONFIG_CRYPTO_LIB_AES=y, CONFIG_CRYPTO_LIB_DES=m
+- and CONFIG_CRYPTO_DEV_SAFEXCEL=m
+
+* Sun Nov 24 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.13-1
+- Updated with the 5.3.13 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.13]
+
+* Wed Nov 20 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.12-1
+- Updated with the 5.3.12 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.12]
+
+* Tue Nov 12 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.11-1
+- Updated with the 5.3.11 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.11]
+- CONFIG_X86_INTEL_TSX_MODE_OFF=y
+
+* Sun Nov 10 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.10-1
+- Updated with the 5.3.10 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.10]
+
+* Wed Nov 06 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.9-1
+- Updated with the 5.3.9 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.9]
+
+* Tue Oct 29 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.8-1
+- Updated with the 5.3.8 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.8]
+
+* Thu Oct 17 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.7-1
+- Updated with the 5.3.7 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.7]
+
+* Fri Oct 11 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.6-1
+- Updated with the 5.3.6 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.6]
+
+* Mon Oct 07 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.5-1
+- Updated with the 5.3.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.5]
+
+* Sat Oct 05 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.4-1
+- Updated with the 5.3.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.4]
+- Note: There was no linux-5.3.3 release due to an upstream
+- developer "mishap". Details can be seen via the following link:
+- https://lore.kernel.org/lkml/20191001070738.GC2893807@kroah.com/
+
+* Tue Oct 01 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.2-1
+- Updated with the 5.3.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.2]
+- CONFIG_NVME_MULTIPATH=y [https://elrepo.org/bugs/view.php?id=945]
+- CONFIG_NVME_CORE=m [https://elrepo.org/bugs/view.php?id=946]
+
+* Sat Sep 21 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.1-1
+- Updated with the 5.3.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.3.1]
+
+* Mon Sep 16 2019 Alan Bartlett <ajb@elrepo.org> - 5.3.0-1
+- Updated with the 5.3 source tarball.
+- CONFIG_CC_CAN_LINK=y, CONFIG_X86_HV_CALLBACK_VECTOR=y,
+- CONFIG_CPU_SUP_ZHAOXIN=y, CONFIG_HAVE_KVM_NO_POLL=y,
+- CONFIG_HAVE_FAST_GUP=y, CONFIG_ARCH_HAS_PTE_DEVMAP=y,
+- CONFIG_NFT_SYNPROXY=m, CONFIG_NF_TABLES_BRIDGE=m,
+- CONFIG_NFT_BRIDGE_META=m, CONFIG_NF_CONNTRACK_BRIDGE=m,
+- CONFIG_NET_ACT_MPLS=m, CONFIG_NET_ACT_CTINFO=m,
+- CONFIG_NET_ACT_CT=m, CONFIG_BT_HCIBTUSB_MTK=y,
+- CONFIG_FW_LOADER_PAGED_BUF=y, CONFIG_NET_VENDOR_GOOGLE=y,
+- CONFIG_GVE=m, CONFIG_XILINX_AXI_EMAC=m, CONFIG_MDIO_I2C=m,
+- CONFIG_PHYLINK=m, CONFIG_SFP=m, CONFIG_NXP_TJA11XX_PHY=m,
+- CONFIG_MISDN_HDLC=m, CONFIG_JOYSTICK_IFORCE_USB=m,
+- CONFIG_JOYSTICK_IFORCE_232=m, CONFIG_SERIAL_MCTRL_GPIO=y,
+- CONFIG_POWER_SUPPLY_HWMON=y, CONFIG_SENSORS_NPCM7XX=m,
+- CONFIG_SENSORS_IRPS5401=m, CONFIG_SENSORS_PXE1610=m,
+- CONFIG_WATCHDOG_OPEN_TIMEOUT=0, CONFIG_REGULATOR_SLG51000=m,
+- CONFIG_DRM_VRAM_HELPER=m, CONFIG_DRM_AMD_DC_DCN2_0=y,
+- CONFIG_DRM_AMD_DC_DSC_SUPPORT=y, CONFIG_DRM_I915_FORCE_PROBE="",
+- CONFIG_DRM_I915_USERFAULT_AUTOSUSPEND=250,
+- CONFIG_DRM_I915_SPIN_REQUEST=5, CONFIG_SND_SOC_INTEL_CML_H=m,
+- CONFIG_SND_SOC_INTEL_CML_LP=m,
+- CONFIG_SND_SOC_INTEL_BYT_CHT_CX2072X_MACH=m,
+- CONFIG_SND_SOC_CX2072X=m, CONFIG_LEDS_TI_LMU_COMMON=m,
+- CONFIG_RDMA_SIW=m, CONFIG_RTC_DRV_BD70528=m, CONFIG_DW_EDMA=m,
+- CONFIG_DW_EDMA_PCIE=m, CONFIG_VIRTIO_PMEM=m, CONFIG_HYPERV_TIMER=y,
+- CONFIG_XIAOMI_WMI=m, CONFIG_ACPI_CMPC=m, CONFIG_SAMSUNG_Q10=m,
+- CONFIG_PROC_PID_ARCH_STATUS=y, CONFIG_KEYS_REQUEST_CACHE=y,
+- CONFIG_CRYPTO_XXHASH=m, CONFIG_CRYPTO_LIB_ARC4=m,
+- CONFIG_CRYPTO_DEV_ATMEL_I2C=m, CONFIG_CRYPTO_DEV_ATMEL_ECC=m,
+- CONFIG_CRYPTO_DEV_ATMEL_SHA204A=m, CONFIG_DIMLIB=y,
+- CONFIG_HAVE_GENERIC_VDSO=y and CONFIG_GENERIC_GETTIMEOFDAY=y
+
+* Tue Sep 10 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.14-1
+- Updated with the 5.2.14 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.14]
+
+* Fri Sep 06 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.13-1
+- Updated with the 5.2.13 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.13]
+
+* Fri Sep 06 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.12-1
+- Updated with the 5.2.12 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.12]
+
+* Thu Aug 29 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.11-1
+- Updated with the 5.2.11 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.11]
+
+* Sun Aug 25 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.10-1
+- Updated with the 5.2.10 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.10]
+
+* Fri Aug 16 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.9-1
+- Updated with the 5.2.9 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.9]
+
+* Fri Aug 09 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.8-1
+- Updated with the 5.2.8 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.8]
+
+* Tue Aug 06 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.7-1
+- Updated with the 5.2.7 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.7]
+
+* Sun Aug 04 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.6-1
+- Updated with the 5.2.6 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.6]
+
+* Wed Jul 31 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.5-1
+- Updated with the 5.2.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.5]
+
+* Sun Jul 28 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.4-1
+- Updated with the 5.2.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.4]
+
+* Sat Jul 27 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.3-1
+- Updated with the 5.2.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.3]
+
+* Sun Jul 21 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.2-1
+- Updated with the 5.2.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.2]
+
+* Sun Jul 14 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.1-1
+- Updated with the 5.2.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.2.1]
+
+* Mon Jul 08 2019 Alan Bartlett <ajb@elrepo.org> - 5.2.0-1
+- Updated with the 5.2 source tarball.
+- CONFIG_ARCH_HAS_SET_DIRECT_MAP=y, CONFIG_CONTIG_ALLOC=y,
+- CONFIG_ARCH_HAS_HMM_MIRROR=y, CONFIG_ARCH_HAS_HMM_DEVICE=y,
+- CONFIG_NETFILTER_XT_TARGET_MASQUERADE=m, CONFIG_BT_MTKSDIO=m,
+- CONFIG_NET_DEVLINK=y, CONFIG_NET_VENDOR_XILINX=y,
+- CONFIG_XILINX_LL_TEMAC=m, CONFIG_AX88796B_PHY=m,
+- CONFIG_MT7615E=m, CONFIG_RTW88=m, CONFIG_RTW88_CORE=m,
+- CONFIG_RTW88_PCI=m, CONFIG_RTW88_8822BE=y, CONFIG_RTW88_8822CE=y,
+- CONFIG_I2C_AMD_MP2=m, CONFIG_SENSORS_IR38064=m, CONFIG_SENSORS_ISL68137=m,
+- CONFIG_HPWDT_NMI_DECODING=y, CONFIG_MEDIA_CONTROLLER=y,
+- CONFIG_MEDIA_CONTROLLER_DVB=y, CONFIG_DRM_GEM_SHMEM_HELPER=y,
+- CONFIG_SND_USB_AUDIO_USE_MEDIA_CONTROLLER=y, CONFIG_LEDS_LM3532=m,
+- CONFIG_INFINIBAND_EFA=m, CONFIG_NVMEM_SYSFS=y,
+- CONFIG_INIT_STACK_NONE=y, CONFIG_CRYPTO_RSA=y, CONFIG_CRYPTO_DH=m,
+- CONFIG_CRYPTO_ECC=m, CONFIG_CRYPTO_ECDH=m, CONFIG_CRYPTO_ECRDSA=m,
+- CONFIG_CORDIC=m, CONFIG_RATIONAL=y, CONFIG_ARCH_STACKWALK=y,
+- CONFIG_OPTIMIZE_INLINING=y and CONFIG_DEBUG_MISC=y
+
+* Wed Jul 03 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.16-1
+- Updated with the 5.1.16 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.16]
+
+* Tue Jun 25 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.15-1
+- Updated with the 5.1.15 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.15]
+
+* Sat Jun 22 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.14-1
+- Updated with the 5.1.14 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.14]
+
+* Sat Jun 22 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.13-1
+- Updated with the 5.1.13 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.13]
+- Not released due to a patch being missing from the upstream
+- stable tree. [https://lkml.org/lkml/2019/6/21/875]
+
+* Wed Jun 19 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.12-1
+- Updated with the 5.1.12 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.12]
+
+* Mon Jun 17 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.11-1
+- Updated with the 5.1.11 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.11]
+
+* Sat Jun 15 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.10-1
+- Updated with the 5.1.10 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.10]
+
+* Tue Jun 11 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.9-1
+- Updated with the 5.1.9 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.9]
+
+* Sun Jun 09 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.8-1
+- Updated with the 5.1.8 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.8]
+
+* Tue Jun 04 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.7-1
+- Updated with the 5.1.7 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.7]
+- Added NO_LIBZSTD=1 directive to the %%global perf_make line.
+
+* Fri May 31 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.6-1
+- Updated with the 5.1.6 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.6]
+
+* Sat May 25 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.5-1
+- Updated with the 5.1.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.5]
+
+* Wed May 22 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.4-1
+- Updated with the 5.1.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.4]
+
+* Thu May 16 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.3-1
+- Updated with the 5.1.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.3]
+- Purge the source tree of all unrequired dot-files.
+- [https://elrepo.org/bugs/view.php?id=912]
+
+* Tue May 14 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.2-1
+- Updated with the 5.1.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.2]
+
+* Sat May 11 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.1-1
+- Updated with the 5.1.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.1.1]
+
+* Mon May 06 2019 Alan Bartlett <ajb@elrepo.org> - 5.1.0-1
+- Updated with the 5.1 source tarball.
+- CONFIG_CC_HAS_WARN_MAYBE_UNINITIALIZED=y,
+- CONFIG_CC_DISABLE_WARN_MAYBE_UNINITIALIZED=y,
+- CONFIG_CONTEXT_TRACKING=y, CONFIG_IO_URING=y,
+- CONFIG_EFI_EARLYCON=y, CONFIG_ARCH_USE_MEMREMAP_PROT=y,
+- CONFIG_UNIX_SCM=y, CONFIG_NF_CT_PROTO_GRE=y,
+- CONFIG_NF_NAT_MASQUERADE=y, CONFIG_IPVLAN_L3S=y,
+- CONFIG_IPMI_PLAT_DATA=y, CONFIG_IR_RCMM_DECODER=m,
+- CONFIG_SND_SOC_CS35L36=m, CONFIG_SND_SOC_CS4341=m,
+- CONFIG_SND_SOC_RK3328=m, CONFIG_SND_SOC_WM8904=m,
+- CONFIG_SND_SOC_MT6358=m, CONFIG_USB_AUTOSUSPEND_DELAY=2,
+- CONFIG_INFINIBAND_BNXT_RE=m, CONFIG_INFINIBAND_HFI1=m,
+- CONFIG_INFINIBAND_QEDR=m, CONFIG_INFINIBAND_RDMAVT=m,
+- CONFIG_RDMA_RXE=m, CONFIG_EDAC_I10NM=m, CONFIG_RTC_DRV_ABEOZ9=m,
+- CONFIG_RTC_DRV_RV3028=m, CONFIG_RTC_DRV_SD3078=m,
+- CONFIG_CHARLCD_BL_FLASH=y, CONFIG_IOMMU_IOVA=y,
+- CONFIG_HYPERV_IOMMU=y, CONFIG_DEV_DAX_KMEM=m,
+- CONFIG_DEV_DAX_PMEM_COMPAT=m, CONFIG_VALIDATE_FS_PARSER=y,
+- CONFIG_LSM="yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor",
+- CONFIG_DMA_DECLARE_COHERENT=y and CONFIG_UBSAN_ALIGNMENT=y
+
+* Sun May 05 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.13-1
+- Updated with the 5.0.13 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.13]
+
+* Sat May 04 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.12-1
+- Updated with the 5.0.12 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.12]
+
+* Thu May 02 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.11-1
+- Updated with the 5.0.11 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.11]
+
+* Sat Apr 27 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.10-1
+- Updated with the 5.0.10 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.10]
+
+* Sat Apr 20 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.9-1
+- Updated with the 5.0.9 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.9]
+
+* Wed Apr 17 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.8-1
+- Updated with the 5.0.8 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.8]
+
+* Fri Apr 05 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.7-1
+- Updated with the 5.0.7 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.7]
+
+* Wed Apr 03 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.6-1
+- Updated with the 5.0.6 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.6]
+
+* Wed Mar 27 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.5-1
+- Updated with the 5.0.5 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.5]
+
+* Sat Mar 23 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.4-1
+- Updated with the 5.0.4 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.4]
+- CONFIG_SQUASHFS_LZ4=y and CONFIG_SQUASHFS_ZSTD=y
+- [https://elrepo.org/bugs/view.php?id=908]
+
+* Tue Mar 19 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.3-1
+- Updated with the 5.0.3 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.3]
+
+* Wed Mar 13 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.2-1
+- Updated with the 5.0.2 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.2]
+
+* Sun Mar 10 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.1-1
+- Updated with the 5.0.1 source tarball.
+- [https://www.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.0.1]
+
 * Tue Mar 05 2019 Alan Bartlett <ajb@elrepo.org> - 5.0.0-2
 - CONFIG_BLK_WBT=y, CONFIG_BLK_WBT_MQ=y,
 - CONFIG_MQ_IOSCHED_DEADLINE=y, CONFIG_MQ_IOSCHED_KYBER=y,
@@ -1251,7 +2045,7 @@ fi
 * Fri Feb 23 2018 Alan Bartlett <ajb@elrepo.org> - 4.15.5-1
 - Updated with the 4.15.5 source tarball.
 - [https://www.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.15.5]
-- Reverted "libxfs: pack the agfl header structure so XFS_AGFL_SIZE
+- Reverted "libxfs: pack the agfl header structure so XFS_AGFL_SIZE 
 - is correct" [https://elrepo.org/bugs/view.php?id=829]
 
 * Sat Feb 17 2018 Alan Bartlett <ajb@elrepo.org> - 4.15.4-1
