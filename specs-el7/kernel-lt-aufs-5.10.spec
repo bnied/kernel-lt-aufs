@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 5.10.30
+%define LKAver 5.10.31
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -326,6 +326,8 @@ BuildKernel() {
     # Set the EXTRAVERSION string in the top level Makefile.
     %{__sed} -i "s/^EXTRAVERSION.*/EXTRAVERSION = -%{release}${Flavour}.%{_target_cpu}/" Makefile
 
+    # Dirty hack
+    %{__make} -s ARCH=%{buildarch} olddefconfig
 
     %{__make} -s ARCH=%{buildarch} oldconfig
 
