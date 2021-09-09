@@ -404,9 +404,6 @@ pushd linux-%{KVERREL} > /dev/null
 %if %{with_default}
 %{__cp} config-%{version}-%{_target_cpu} .config
 
-# Dirty hack
-%{__make} -s ARCH=%{_target_cpu} olddefconfig
-
 %{__make} -s ARCH=%{_target_cpu} oldconfig
 
 %{__make} -s ARCH=%{_target_cpu} %{?_smp_mflags} bzImage

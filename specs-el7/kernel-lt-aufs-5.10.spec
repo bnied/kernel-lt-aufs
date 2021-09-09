@@ -326,9 +326,6 @@ BuildKernel() {
     # Set the EXTRAVERSION string in the top level Makefile.
     %{__sed} -i "s/^EXTRAVERSION.*/EXTRAVERSION = -%{release}${Flavour}.%{_target_cpu}/" Makefile
 
-    # Dirty hack
-    %{__make} -s ARCH=%{buildarch} olddefconfig
-
     %{__make} -s ARCH=%{buildarch} oldconfig
 
     %{__make} -s ARCH=%{buildarch} %{?_smp_mflags} bzImage
