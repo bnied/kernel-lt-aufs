@@ -119,7 +119,7 @@ The %{name} meta package.
 #
 # This macro supplies the requires, provides, conflicts
 # and obsoletes for the kernel-lt-aufs package.
-#	%%kernel_reqprovconf <subpackage>
+#   %%kernel_reqprovconf <subpackage>
 #
 %define kernel_reqprovconf \
 Provides: %{name} = %{version}-%{release}\
@@ -239,7 +239,7 @@ manipulation of eBPF programs and maps.
 
 #
 # This macro creates a kernel-lt-aufs-<subpackage>-devel package.
-#	%%kernel_devel_package <subpackage> <pretty-name>
+#   %%kernel_devel_package <subpackage> <pretty-name>
 #
 %define kernel_devel_package() \
 %package %{?1:%{1}-}devel\
@@ -260,7 +260,7 @@ against the %{?2:%{2} }kernel package.\
 
 #
 # This macro creates a kernel-lt-aufs-<subpackage>-modules-extra package.
-#	%%kernel_modules_extra_package <subpackage> <pretty-name>
+#   %%kernel_modules_extra_package <subpackage> <pretty-name>
 #
 %define kernel_modules_extra_package() \
 %package %{?1:%{1}-}modules-extra\
@@ -281,7 +281,7 @@ This package provides less commonly used kernel modules for the %{?2:%{2} }kerne
 
 #
 # This macro creates a kernel-lt-aufs-<subpackage>-modules package.
-#	%%kernel_modules_package <subpackage> <pretty-name>
+#   %%kernel_modules_package <subpackage> <pretty-name>
 #
 %define kernel_modules_package() \
 %package %{?1:%{1}-}modules\
@@ -301,7 +301,7 @@ This package provides commonly used kernel modules for the %{?2:%{2}-}core kerne
 
 #
 # This macro creates a kernel-lt-aufs-<subpackage> meta package.
-#	%%kernel_meta_package <subpackage>
+#   %%kernel_meta_package <subpackage>
 #
 %define kernel_meta_package() \
 %package %{1}\
@@ -317,7 +317,7 @@ The meta-package for the %{1} kernel\
 #
 # This macro creates a kernel-lt-aufs-<subpackage>
 # and its corresponding devel package.
-#	%%kernel_variant_package [-n <pretty-name>] <subpackage>
+#   %%kernel_variant_package [-n <pretty-name>] <subpackage>
 #
 %define kernel_variant_package(n:) \
 %package %{?1:%{1}-}core\
@@ -599,8 +599,6 @@ fi
 %{__cp} -a --parents arch/x86/boot/string.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %{__cp} -a --parents arch/x86/entry/syscalls/syscall_32.tbl $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %{__cp} -a --parents arch/x86/entry/syscalls/syscall_64.tbl $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-%{__cp} -a --parents arch/x86/entry/syscalls/syscallhdr.sh $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-%{__cp} -a --parents arch/x86/entry/syscalls/syscalltbl.sh $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %{__cp} -a --parents arch/x86/purgatory/entry64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %{__cp} -a --parents arch/x86/purgatory/purgatory.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %{__cp} -a --parents arch/x86/purgatory/setup-x86_64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
@@ -610,6 +608,8 @@ fi
 %{__cp} -a --parents arch/x86/tools/relocs.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %{__cp} -a --parents arch/x86/tools/relocs_common.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %{__cp} -a --parents arch/x86/tools/relocs.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+%{__cp} -a --parents scripts/syscallhdr.sh $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+%{__cp} -a --parents scripts/syscalltbl.sh $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %{__cp} -a --parents tools/include/tools/le_byteshift.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 
 # Now ensure that the Makefile and version.h files have matching
@@ -832,8 +832,8 @@ popd > /dev/null
 # because they might also install their own set of header files.
 # Compute a content hash to export as Provides: kernel-lt-aufs-headers-checksum.
 HEADERS_CHKSUM=$(export LC_ALL=C; find $RPM_BUILD_ROOT/usr/include -name '*.h' -type f \
-			! -path $RPM_BUILD_ROOT/usr/include/linux/version.h | \
-			sort | xargs %{__cat} | sha1sum - | cut -f1 -d' ');
+            ! -path $RPM_BUILD_ROOT/usr/include/linux/version.h | \
+            sort | xargs %{__cat} | sha1sum - | cut -f1 -d' ');
 # Export the checksum via the usr/include/linux/version.h file so the dynamic
 # find-provides can obtain the hash to update it accordingly.
 echo "#define KERNEL_HEADERS_CHECKSUM \"$HEADERS_CHKSUM\"" >> $RPM_BUILD_ROOT/usr/include/linux/version.h
@@ -865,7 +865,7 @@ popd > /dev/null
 
 #
 # This macro defines a %%post script for a kernel*-devel package.
-#	%%kernel_devel_post [<subpackage>]
+#   %%kernel_devel_post [<subpackage>]
 #
 %define kernel_devel_post() \
 %{expand:%%post %{?1:%{1}-}devel}\
@@ -883,7 +883,7 @@ fi\
 #
 # This macro defines a %%post script for a kernel*-modules-extra package.
 # It also defines a %%postun script that does the same thing.
-#	%%kernel_modules_extra_post [<subpackage>]
+#   %%kernel_modules_extra_post [<subpackage>]
 #
 %define kernel_modules_extra_post() \
 %{expand:%%post %{?1:%{1}-}modules-extra}\
@@ -896,7 +896,7 @@ fi\
 #
 # This macro defines a %%post script for a kernel*-modules package.
 # It also defines a %%postun script that does the same thing.
-#	%%kernel_modules_post [<subpackage>]
+#   %%kernel_modules_post [<subpackage>]
 #
 %define kernel_modules_post() \
 %{expand:%%post %{?1:%{1}-}modules}\
@@ -907,7 +907,7 @@ fi\
 %{nil}
 
 # This macro defines a %%posttrans script for a kernel package.
-#	%%kernel_variant_posttrans [<subpackage>]
+#   %%kernel_variant_posttrans [<subpackage>]
 #
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1:%{1}-}core}\
@@ -919,7 +919,7 @@ fi\
 
 #
 # This macro defines a %%post script for a kernel-lt-aufs package and its devel package.
-#	%%kernel_variant_post [-v <subpackage>] [-r <replace>]
+#   %%kernel_variant_post [-v <subpackage>] [-r <replace>]
 #
 %define kernel_variant_post(v:r:) \
 %{expand:%%kernel_devel_post %{?-v*}}\
@@ -935,7 +935,7 @@ fi}\
 
 #
 # This macro defines a %%preun script for a kernel-lt-aufs package.
-#	%%kernel_variant_preun <subpackage>
+#   %%kernel_variant_preun <subpackage>
 #
 %define kernel_variant_preun() \
 %{expand:%%preun %{?1:%{1}-}core}\
@@ -1023,7 +1023,6 @@ fi
 %files -n bpftool
 %{_sbindir}/bpftool
 %{_sysconfdir}/bash_completion.d/bpftool
-%{_mandir}/man7/bpf-helpers.7.gz
 %{_mandir}/man8/bpftool*
 %endif
 
@@ -1036,7 +1035,7 @@ fi
 #
 # This macro defines the %%files sections for the kernel-lt-aufs package
 # and its corresponding devel package.
-#	%%kernel_variant_files [-k vmlinux] <condition> <subpackage>
+#   %%kernel_variant_files [-k vmlinux] <condition> <subpackage>
 #
 %define kernel_variant_files(k:) \
 %if %{2}\
