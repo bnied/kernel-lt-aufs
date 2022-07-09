@@ -4,17 +4,9 @@ This repository contains the RPM spec and config files to build [kernel-lt](http
 
 The Docker spec files that were part of the [original repo](https://github.com/sciurus/docker-rhel-rpm.git) are no longer included.
 
-Additionally, the build script I had written to build these RPMs has been deprecated. RPM building is now done via the [`kernel-lt-aufs-docker` image.](https://github.com/bnied/kernel-lt-aufs-docker)
+These kernels should work on Red Hat Enterprise Linux, and any RHEL-derivative distrubition, such Almalinux, CentOS, Oracle Enterprise Linux, or Rocky Linux.
 
-This has been tested on the following distributions:
-* CentOS 7
-* CentOS 8
-* Red Hat Enterprise Linux 7
-* Red Hat Enterprise Linux 8
-
-Other RHEL-derivative Linux distributions (AlmaLinux, Rocky Linux, etc.) should all work as well, but haven't been tested.
-
-### EL6 support has ended. However, older kernel packages are available on `yum.spaceduck.org` for historical purposes.
+### EL9 support is very, very alpha. These packages have not been fully tested yet. Use at your own risk!
 
 ***
 ## Downloading Packages
