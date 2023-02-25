@@ -1,7 +1,7 @@
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
-%define LKAver 5.15.95
+%define LKAver 6.1.14
 
 # Define the version of the aufs-standalone tarball
 %define AUFSver aufs-standalone
@@ -30,6 +30,7 @@
 
 # kernel-lt-aufs, devel, headers, perf, tools and bpftool.
 %ifarch x86_64
+%define with_perf 0
 %define with_doc 0
 %define doc_build_fail true
 %define zipmodules 1
@@ -80,10 +81,10 @@ ExclusiveArch: noarch x86_64
 ExclusiveOS: Linux
 Requires: %{name}-core-uname-r = %{KVERREL}
 Requires: %{name}-modules-uname-r = %{KVERREL}
-BuildRequires: bash bc binutils bison bzip2 diffutils elfutils-devel findutils
+BuildRequires: bash bc binutils bison bzip2 coreutils diffutils elfutils-devel findutils
 BuildRequires: flex gawk gcc git gzip hmaccalc hostname kmod libcap-devel m4 make net-tools
 BuildRequires: openssl openssl-devel patch perl-Carp perl-devel perl-generators
-BuildRequires: perl-interpreter python3-devel redhat-rpm-config rsync sh-utils tar xz
+BuildRequires: perl-interpreter python3-devel redhat-rpm-config rsync tar xz
 %if %{with_doc}
 BuildRequires: asciidoc python3-sphinx xmlto
 %endif
@@ -405,6 +406,8 @@ pushd linux-%{KVERREL} > /dev/null
 %{__cp} config-%{version}-%{_target_cpu} .config
 
 %{__make} -s ARCH=%{_target_cpu} oldconfig
+
+%{__make} -s ARCH=%{_target_cpu} olddefconfig
 
 %{__make} -s ARCH=%{_target_cpu} %{?_smp_mflags} bzImage
 
