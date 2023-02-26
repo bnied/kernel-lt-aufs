@@ -290,10 +290,9 @@ cp -r ../%{AUFSver}/Documentation/filesystems Documentation/
 cp -r ../%{AUFSver}/Documentation/ABI Documentation/
 cp -r ../%{AUFSver}/fs/aufs fs/
 cp ../%{AUFSver}/include/uapi/linux/aufs_type.h include/uapi/linux/
-patch -p 1 < ../%{AUFSver}/aufs5-kbuild.patch
-patch -p 1 < ../%{AUFSver}/aufs5-base.patch
-patch -p 1 < ../%{AUFSver}/aufs5-mmap.patch
-
+patch -p 1 < ../%{AUFSver}/aufs6-kbuild.patch
+patch -p 1 < ../%{AUFSver}/aufs6-base.patch
+patch -p 1 < ../%{AUFSver}/aufs6-mmap.patch
 # Purge the source tree of all unrequired dot-files.
 %{_bindir}/find -name '.[a-z]*' | %{_bindir}/xargs --no-run-if-empty %{__rm} -rf
 
