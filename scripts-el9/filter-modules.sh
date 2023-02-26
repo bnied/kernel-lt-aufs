@@ -13,6 +13,9 @@
 # subsys should be in kernel-modules on all arches, please change the defaults
 # listed here.
 
+# Overrides is individual modules which need to remain in kernel-core due to deps.
+overrides="cec"
+
 # Set the default dirs/modules to filter out
 driverdirs="atm auxdisplay bcma bluetooth firewire fmc iio infiniband isdn leds media memstick mfd mmc mtd nfc ntb pcmcia platform power ssb staging tty uio uwb w1"
 
@@ -28,13 +31,13 @@ scsidrvs="aacraid aic7xxx aic94xx be2iscsi bfa bnx2i bnx2fc csiostor cxgbi esas2
 
 usbdrvs="atm image misc serial wusbcore"
 
-fsdrvs="affs befs coda cramfs ecryptfs hfs hfsplus jfs minix ncpfs nilfs2 ocfs2 reiserfs romfs squashfs sysv ubifs ufs"
+fsdrvs="affs befs cifs coda cramfs ecryptfs hfs hfsplus jfs minix ncpfs nilfs2 ocfs2 reiserfs romfs squashfs sysv ubifs ufs"
 
 netprots="6lowpan appletalk atm ax25 batman-adv bluetooth can dccp dsa ieee802154 irda l2tp mac80211 mac802154 mpls netrom nfc rds rfkill rose sctp smc wireless"
 
 drmdrvs="amd ast gma500 i2c i915 mgag200 nouveau radeon via "
 
-singlemods="ntb_netdev iscsi_ibft iscsi_boot_sysfs megaraid pmcraid qedi qla1280 9pnet_rdma rpcrdma nvmet-rdma nvme-rdma hid-picolcd hid-prodikeys hwa-hc hwpoison-inject hid-sensor-hub target_core_user sbp_target cxgbit iw_cxgb3 iw_cxgb4 cxgb3i cxgb3i cxgb3i_ddp cxgb4i chcr parport_serial ism"
+singlemods="ntb_netdev iscsi_ibft iscsi_boot_sysfs megaraid pmcraid qedi qla1280 9pnet_rdma rpcrdma nvmet-rdma nvme-rdma hid-picolcd hid-prodikeys hwa-hc hwpoison-inject hid-sensor-hub target_core_user sbp_target cxgbit iw_cxgb3 iw_cxgb4 cxgb3i cxgb3i cxgb3i_ddp cxgb4i chcr chtls parport_serial ism regmap-sdw regmap-sdw-mbq arizona-micsupp hid-asus"
 
 # Grab the arch-specific filter list overrides
 source ./filter-$2.sh
@@ -88,7 +91,7 @@ done
 # Filter the char drivers
 for char in ${chardrvs}
 do
-	filter_dir $1 drivers/char/${input}
+	filter_dir $1 drivers/char/${char}
 done
 
 # Filter the ethernet drivers
@@ -135,12 +138,27 @@ done
 
 # Just kill sound.
 filter_dir $1 kernel/sound
+filter_dir $1 kernel/drivers/soundwire
 
 # Now go through and filter any single .ko files that might have deps on the
 # things we filtered above
 for mod in ${singlemods}
 do
         filter_ko $1 ${mod}
+done
+
+# Now process the override list to bring those modules back into core
+for mod in ${overrides}
+do
+	grep -v -e "/${mod}.ko" k-d.list > k-d.list.tmp
+	if [ $? -ne 0 ]
+        then
+                echo "Couldn't save ${mod}.ko  Skipping."
+        else
+                grep -e "/${mod}.ko" k-d.list >> $filelist
+                mv k-d.list.tmp k-d.list
+        fi
+
 done
 
 # Go through our generated drivers list and remove the .ko files.  We'll

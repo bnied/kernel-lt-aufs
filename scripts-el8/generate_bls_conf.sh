@@ -19,7 +19,7 @@ else
 fi
 
 cat >${output} <<EOF
-title ${NAME} (${kernelver}) ${VERSION}${debugname}
+title Enterprise Linux (${kernelver}) ${VERSION_ID}${debugname}
 version ${kernelver}${debugid}
 linux ${bootprefix}/vmlinuz-${kernelver}
 initrd ${bootprefix}/initramfs-${kernelver}.img

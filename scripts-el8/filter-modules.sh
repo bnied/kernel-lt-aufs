@@ -147,5 +147,5 @@ done
 # restore them later.
 for mod in `cat k-d.list`
 do
-	rm -rf $mod
+	rm -fr $mod
 done

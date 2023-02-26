@@ -5,12 +5,12 @@ Dir=$Rpmdir/$2
 List=$3
 
 pushd $Dir
-rm -rf modnames
+rm -fr modnames
 find . -name "*.ko" -type f > modnames
 # Look through all of the modules, and throw any that have a dependency in
 # our list into the list as well.
-rm -rf dep.list
-rm -rf req.list req2.list
+rm -fr dep.list
+rm -fr req.list req2.list
 touch dep.list req.list
 cp $List .
 
@@ -53,8 +53,8 @@ do
 done
 
 sort -u dep.list > $Rpmdir/modules-extra.list
-rm modnames dep.list req.list req2.list
-rm mod-extra.list mod-extra2.list mod-extra3.list
+rm -f modnames dep.list req.list req2.list
+rm -f mod-extra.list mod-extra2.list mod-extra3.list
 popd
 
 sed -i "s|^\/||g" $Rpmdir/modules-extra.list
