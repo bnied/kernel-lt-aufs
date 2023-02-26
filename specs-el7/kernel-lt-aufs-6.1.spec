@@ -152,7 +152,7 @@ BuildRequires: gettext, ncurses-devel, pciutils-devel
 %endif
 
 # Sources.
-Source0: https://www.kernel.org/pub/linux/kernel/v5.x/linux-%{LKAver}.tar.xz
+Source0: https://www.kernel.org/pub/linux/kernel/v6.x/linux-%{LKAver}.tar.xz
 Source1: config-%{version}-x86_64
 Source2: cpupower.service
 Source3: cpupower.config
