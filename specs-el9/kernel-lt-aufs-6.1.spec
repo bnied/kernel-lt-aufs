@@ -580,7 +580,7 @@ cp -a %{SOURCE2} .
 #cp -a %{SOURCE4} .
 
 # Dirty hack
-%{__make} -s ARCH=%{buildarch} olddefconfig
+%{__make} -s ARCH=%{bldarch} olddefconfig
 
 # Set the EXTRAVERSION string in the top level Makefile.
 sed -i "s@^EXTRAVERSION.*@EXTRAVERSION = -%{release}.%{_target_cpu}@" Makefile
