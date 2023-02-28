@@ -129,6 +129,7 @@
 
 %ifarch x86_64 || aarch64
 %define with_doc 0
+%define with_bpftool 0
 %endif
 
 %ifarch x86_64
