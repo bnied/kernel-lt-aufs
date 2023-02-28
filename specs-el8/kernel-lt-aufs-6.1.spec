@@ -1022,6 +1022,7 @@ fi
 %{_datadir}/perf-core/*
 %{_mandir}/man[1-8]/perf*
 %{_sysconfdir}/bash_completion.d/perf
+%{_libdir}/traceevent/plugins/*
 
 %files -n python3-perf
 %defattr(-,root,root)
