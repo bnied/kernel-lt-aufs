@@ -1,3 +1,16 @@
+# Explicity use python3 to avoid python byte compile errors.
+%global __os_install_post    \
+    /usr/lib/rpm/redhat/brp-compress \
+    %{!?__debug_package:\
+    /usr/lib/rpm/redhat/brp-strip %{__strip} \
+    /usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump} \
+    } \
+    /usr/lib/rpm/redhat/brp-strip-static-archive %{__strip} \
+    /usr/lib/rpm/brp-python-bytecompile /usr/bin/python3 %{?_python_bytecompile_errors_terminate_build} \
+    /usr/lib/rpm/redhat/brp-python-hardlink \
+    %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars} \
+%{nil}
+
 %global __spec_install_pre %{___build_pre}
 
 # Define the version of the Linux Kernel Archive tarball.
@@ -54,6 +67,7 @@
 %ifarch x86_64
 # 64-bit kernel-lt-aufs, headers, perf and tools.
 %define with_doc 0
+%define with_perf 0
 %endif
 
 # Determine the sublevel number and set pkg_version.
@@ -148,7 +162,7 @@ BuildRequires: perl(ExtUtils::Embed), python-devel, python3
 BuildRequires: slang-devel, xz-devel, zlib-devel
 %endif
 %if %{with_tools}
-BuildRequires: gettext, ncurses-devel, pciutils-devel
+BuildRequires: gettext, libcap-devel, ncurses-devel, pciutils-devel
 %endif
 
 # Sources.
@@ -293,6 +307,7 @@ cp ../%{AUFSver}/include/uapi/linux/aufs_type.h include/uapi/linux/
 patch -p 1 < ../%{AUFSver}/aufs6-kbuild.patch
 patch -p 1 < ../%{AUFSver}/aufs6-base.patch
 patch -p 1 < ../%{AUFSver}/aufs6-mmap.patch
+
 # Purge the source tree of all unrequired dot-files.
 %{_bindir}/find -name '.[a-z]*' | %{_bindir}/xargs --no-run-if-empty %{__rm} -rf
 
