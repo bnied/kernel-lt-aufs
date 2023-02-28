@@ -390,6 +390,9 @@ patch -p 1 < ../%{AUFSver}/aufs6-mmap.patch
 
 %{__cp} %{SOURCE1} .
 
+# Dirty hack
+%{__make} -s ARCH=%{buildarch} olddefconfig
+
 # Set the EXTRAVERSION string in the top level Makefile.
 %{__sed} -i "s/^EXTRAVERSION.*/EXTRAVERSION = -%{release}.%{_target_cpu}/" Makefile
 
