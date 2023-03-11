@@ -588,6 +588,8 @@ sed -i "s@^EXTRAVERSION.*@EXTRAVERSION = -%{release}.%{_target_cpu}@" Makefile
 
 %ifarch x86_64 || aarch64
 cp config-%{version}-%{_target_cpu} .config
+# Dirty hack
+%{__make} -s ARCH=%{bldarch} olddefconfig
 %{__make} -s ARCH=%{bldarch} listnewconfig | grep -E '^CONFIG_' > newoptions-el9-%{_target_cpu}.txt || true
 if [ -s newoptions-el9-%{_target_cpu}.txt ]; then
     cat newoptions-el9-%{_target_cpu}.txt
