@@ -60,7 +60,7 @@
 %endif
 
 # Set pkg_release.
-%define pkg_release %{lua:print(os.getenv("RELEASE_VERSION"))}%{?dist}%{?buildid}
+%define pkg_release 1%{?dist}%{?buildid}
 
 %define KVERREL %{pkg_version}-%{pkg_release}.%{_target_cpu}
 
